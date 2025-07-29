@@ -19,13 +19,6 @@
       </div>
 
       <h5 class="q-ma-md">
-        {{ $t('dashboard.quickCards') }}
-      </h5>
-      <div class="row">
-        <quick-cards />
-      </div>
-
-      <h5 class="q-ma-md">
         {{ $t('dashboard.usefulResources') }}
       </h5>
       <div class="row flex items-stretch justify-start">
@@ -41,6 +34,13 @@
           :router-link="card.routerLink ? card.routerLink : false"
           :links="card.links"
         />
+      </div>
+
+      <h5 class="q-ma-md">
+        {{ $t('dashboard.quickCards') }}
+      </h5>
+      <div class="row">
+        <quick-cards />
       </div>
     </div>
   </q-page>
