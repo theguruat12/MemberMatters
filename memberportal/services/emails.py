@@ -108,7 +108,7 @@ def send_single_email(
             recipient_list=[to_email],
             html_message=email_string,
             fail_silently=False,
-            reply_to=[reply_to]
+            reply_to=reply_to or config.EMAIL_DEFAULT_FROM,
         )
         
         if user:
