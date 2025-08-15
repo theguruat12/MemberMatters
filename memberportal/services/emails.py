@@ -1,6 +1,7 @@
 from django.template.loader import render_to_string
 from django.utils.html import escape
-from django.core.mail import send_mail, EmailMessage, get_connection
+from django.core.mail import send_mail, EmailMessage
+from django.core.mail.backends.smtp import EmailBackend
 from constance import config
 from postmarker.core import PostmarkClient, ClientError
 import logging
@@ -101,8 +102,8 @@ def send_single_email(
     )
 
     try:
-        # Configure email connection with constance settings
-        connection = get_connection(
+        # Configure SMTP backend with constance settings
+        backend = EmailBackend(
             host=config.EMAIL_HOST,
             port=config.EMAIL_PORT,
             username=config.EMAIL_HOST_USER,
@@ -117,7 +118,7 @@ def send_single_email(
             from_email=config.EMAIL_DEFAULT_FROM,
             to=[to_email],
             reply_to=[reply_to] if reply_to else [config.EMAIL_DEFAULT_FROM],
-            connection=connection,
+            connection=backend,
         )
         email.content_subtype = "html"  # Set content type to HTML
         email.send(fail_silently=False)
