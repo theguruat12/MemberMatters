@@ -1,5 +1,5 @@
 # Specify our base image
-FROM python:3.12-bullseye
+FROM python:3.11-bullseye
 LABEL maintainer="Jaimyn Mayer (github@jaimyn.dev)"
 LABEL description="Base Dockerfile for the MemberMatters software."
 
