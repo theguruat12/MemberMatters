@@ -1,5 +1,6 @@
 from django.template.loader import render_to_string
 from django.utils.html import escape
+from django.core.mail import send_mail
 from constance import config
 from postmarker.core import PostmarkClient, ClientError
 import logging
@@ -8,7 +9,7 @@ import json
 logger = logging.getLogger("emails")
 
 
-def send_single_email(
+def send_single_email_postmark(
     to_email: object,
     subject: object,
     template_vars: object,
@@ -73,6 +74,60 @@ def send_single_email(
                 "email",
                 "Email content: " + json.dumps(template_vars),
             )
+    return True
+
+
+def send_single_email(
+    to_email: object,
+    subject: object,
+    template_vars: object,
+    template_name=None,
+    reply_to=None,
+    user: object | None = None,
+) -> object:
+    # TODO: move to celery
+
+    template_to_use = template_name if template_name else "email_without_button.html"
+    logger.debug("Using email template: " + template_to_use)
+    logger.debug("Using template vars: " + json.dumps(template_vars))
+
+    if template_vars.get("message"):
+        template_vars["message"] = escape(template_vars["message"]).replace(
+            "~br~", "<br>"
+        )
+
+    email_string = render_to_string(
+        template_to_use, {"email": template_vars, "config": config}
+    )
+
+    try:
+        send_mail(
+            subject=subject,
+            message="",  # Plain text version (empty since we're using HTML)
+            from_email=config.EMAIL_DEFAULT_FROM,
+            recipient_list=[to_email],
+            html_message=email_string,
+            fail_silently=False,
+        )
+        
+        if user:
+            logger.info("Email sent to " + to_email + " with subject: " + subject)
+            user.log_event(
+                "Sent email with subject: " + subject,
+                "email",
+                "Email content: " + json.dumps(template_vars),
+            )
+            
+    except Exception as e:
+        logger.error("Error sending email: " + str(e))
+        if user:
+            user.log_event(
+                "Email NOT sent due to error: " + subject,
+                "email",
+                "Email content: " + json.dumps(template_vars) + " Error: " + str(e),
+            )
+        raise e
+
     return True
 
 
