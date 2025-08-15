@@ -265,6 +265,31 @@ CONSTANCE_CONFIG = {
         "PLEASE_CHANGE_ME",
         "The API key used to send email with Postmark.",
     ),
+    # SMTP Email Configuration
+    "EMAIL_HOST": (
+        "smtp.gmail.com",
+        "SMTP server hostname for sending emails.",
+    ),
+    "EMAIL_PORT": (
+        587,
+        "SMTP server port (usually 587 for TLS or 465 for SSL).",
+    ),
+    "EMAIL_HOST_USER": (
+        "",
+        "Username for SMTP authentication.",
+    ),
+    "EMAIL_HOST_PASSWORD": (
+        "",
+        "Password for SMTP authentication.",
+    ),
+    "EMAIL_USE_TLS": (
+        True,
+        "Use TLS encryption for SMTP connection.",
+    ),
+    "EMAIL_USE_SSL": (
+        False,
+        "Use SSL encryption for SMTP connection (mutually exclusive with TLS).",
+    ),
     # Induction
     "MOODLE_INDUCTION_ENABLED": (
         True,
@@ -460,6 +485,17 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
             ),
         ),
         ("Postmark (EMAIL) Integration", ("POSTMARK_API_KEY",)),
+        (
+            "SMTP Email Configuration",
+            (
+                "EMAIL_HOST",
+                "EMAIL_PORT",
+                "EMAIL_HOST_USER",
+                "EMAIL_HOST_PASSWORD",
+                "EMAIL_USE_TLS",
+                "EMAIL_USE_SSL",
+            ),
+        ),
         (
             "Twilio (SMS) Integration",
             (
