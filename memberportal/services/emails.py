@@ -1,6 +1,6 @@
 from django.template.loader import render_to_string
 from django.utils.html import escape
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMessage
 from constance import config
 from postmarker.core import PostmarkClient, ClientError
 import logging
@@ -101,15 +101,15 @@ def send_single_email(
     )
 
     try:
-        send_mail(
+        email = EmailMessage(
             subject=subject,
-            message="",  # Plain text version (empty since we're using HTML)
+            body=email_string,
             from_email=config.EMAIL_DEFAULT_FROM,
-            recipient_list=[to_email],
-            html_message=email_string,
-            fail_silently=False,
-            reply_to=reply_to or config.EMAIL_DEFAULT_FROM,
+            to=[to_email],
+            reply_to=[reply_to] if reply_to else [config.EMAIL_DEFAULT_FROM],
         )
+        email.content_subtype = "html"  # Set content type to HTML
+        email.send(fail_silently=False)
         
         if user:
             logger.info("Email sent to " + to_email + " with subject: " + subject)
