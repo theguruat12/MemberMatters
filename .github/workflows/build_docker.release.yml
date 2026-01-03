@@ -27,4 +27,4 @@ jobs:
           file: docker/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: critical-services/membermatters:latest,critical-services/membermatters:${{github.ref_name}}
+          tags: 10.30.0.34/critical-services/membermatters:latest,10.30.0.34/critical-services/membermatters:${{github.ref_name}}
