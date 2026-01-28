@@ -58,7 +58,7 @@ export default {
     ...mapGetters('config', ['siteOwner']),
     ...mapGetters('profile', ['profile']),
     currentDate() {
-      return dayjs().format('Do MMMM YYYY');
+      return dayjs().format('LL');
     },
     icons() {
       return icons;

@@ -144,16 +144,16 @@ export default defineComponent({
     currentPeriodEnd() {
       return new Date(
         this.subscriptionInfo?.currentPeriodEnd * 1000
-      ).toLocaleString('en-au');
+      ).toLocaleString(this.$q.lang.getLocale());
     },
     signupDate() {
       return new Date(this.subscriptionInfo?.startDate * 1000).toLocaleString(
-        'en-au'
+        this.$q.lang.getLocale()
       );
     },
     cancelAtDate() {
       return new Date(this.subscriptionInfo?.cancelAt * 1000).toLocaleString(
-        'en-au'
+        this.$q.lang.getLocale()
       );
     },
   },

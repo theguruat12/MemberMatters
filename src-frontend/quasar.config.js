@@ -30,7 +30,15 @@ module.exports = configure(async function (ctx) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['sentry', 'i18n', 'axios', 'routeGuards', 'capacitor', 'apexcharts'],
+    boot: [
+      'sentry',
+      'i18n',
+      'axios',
+      'routeGuards',
+      'capacitor',
+      'apexcharts',
+      'dayjs',
+    ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: ['app.scss'],
