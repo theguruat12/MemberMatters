@@ -111,7 +111,7 @@ def send_single_email(
             use_tls=config.EMAIL_USE_TLS,
             use_ssl=config.EMAIL_USE_SSL,
         )
-        
+
         email = EmailMessage(
             subject=subject,
             body=email_string,
@@ -122,7 +122,7 @@ def send_single_email(
         )
         email.content_subtype = "html"  # Set content type to HTML
         email.send(fail_silently=False)
-        
+
         if user:
             logger.info("Email sent to " + to_email + " with subject: " + subject)
             user.log_event(
@@ -130,7 +130,7 @@ def send_single_email(
                 "email",
                 "Email content: " + json.dumps(template_vars),
             )
-            
+
     except Exception as e:
         logger.error("Error sending email: " + str(e))
         if user:
