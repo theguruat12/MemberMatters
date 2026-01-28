@@ -61,7 +61,7 @@ export default {
       return icons;
     },
     date() {
-      return dayjs().format('DD/MM/YY');
+      return dayjs().format('L');
     },
   },
 };

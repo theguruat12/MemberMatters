@@ -1,4 +1,6 @@
-import dayjs from 'dayjs';
+import dayjs from '../utils/dayjs';
+import localeData from 'dayjs/plugin/localeData';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -23,13 +25,13 @@ export function formatDate(date: Date | number, time = true) {
   if (typeof date === 'number' && date < 9439200000) {
     parsedDate = date * 1000;
   }
-  if (time) return dayjs(parsedDate).local().format('D MMM YYYY, h:mm a');
-  return dayjs(parsedDate).local().format('D MMM YYYY');
+  if (time) return dayjs(parsedDate).format('LLL');
+  return dayjs(parsedDate).format('LL');
 }
 
 export function formatDateSimple(date: Date, time = true) {
-  if (time) return dayjs(date).local().format('DD/MM/YYYY, h:mm a');
-  return dayjs(date).local().format('D/MMM/YYYY');
+  if (time) return dayjs(date).format('LLL');
+  return dayjs(date).format('LL');
 }
 
 export function formatWhen(date: Date) {

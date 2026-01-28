@@ -72,13 +72,13 @@ export default {
     },
     dateApproved() {
       return this.date.length
-        ? dayjs(this.date).format('DD/MM/YY')
-        : dayjs().format('DD/MM/YY');
+        ? dayjs(this.date).format('L')
+        : dayjs().format('L');
     },
     dateExpires() {
       return this.date.length
-        ? dayjs(this.date).add(1, 'month').format('DD/MM/YY')
-        : dayjs().add(1, 'month').format('DD/MM/YY');
+        ? dayjs(this.date).add(1, 'month').format('L')
+        : dayjs().add(1, 'month').format('L');
     },
   },
 };

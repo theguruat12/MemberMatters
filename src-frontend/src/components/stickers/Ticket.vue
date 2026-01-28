@@ -78,10 +78,10 @@ export default {
       return icons;
     },
     date() {
-      return dayjs().format('DD/MM/YY'); // May 17th 2020, 1:30:47 pm
+      return dayjs().format('L'); // May 17th 2020, 1:30:47 pm
     },
     exp() {
-      return dayjs().add(14, 'days').format('DD/MM/YY');
+      return dayjs().add(14, 'days').format('L');
     },
     ticketType() {
       return this.red || this.orange ? 'Finder' : 'Owner';
