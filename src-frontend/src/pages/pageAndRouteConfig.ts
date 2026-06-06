@@ -147,8 +147,7 @@ const PageAndRouteConfig: PageAndRouteConfigType[] = [
         to: '/tools/swipes/recent',
         name: 'recentSwipes',
         loggedIn: true,
-        kiosk: true,
-        memberOnly: true,
+        admin: true,
         component: () => import('pages/RecentSwipes.vue'),
       },
       {
@@ -156,8 +155,7 @@ const PageAndRouteConfig: PageAndRouteConfigType[] = [
         to: '/tools/swipes/lastseen',
         name: 'lastSeen',
         loggedIn: true,
-        kiosk: true,
-        memberOnly: true,
+        admin: true,
         component: () => import('pages/LastSeen.vue'),
       },
       {
