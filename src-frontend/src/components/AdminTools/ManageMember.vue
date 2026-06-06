@@ -152,6 +152,7 @@
                   :rules="[
                     (val) =>
                       validateNotEmpty(val) || $t('validation.cannotBeEmpty'),
+                    (val) => checkRfidUniqueness(val),
                   ]"
                   @update:model-value="saveChange('rfidCard')"
                 >
@@ -1465,6 +1466,24 @@ export default defineComponent({
       this.profileForm.screenName = this.selectedMember.screenName;
       this.profileForm.vehicleRegistrationPlate =
         this.selectedMember.vehicleRegistrationPlate;
+    },
+    async checkRfidUniqueness(val: string) {
+      if (!val) return true;
+      try {
+        const res = await this.$axios.get(
+          `/api/admin/rfid-check/?rfid=${encodeURIComponent(
+            val
+          )}&excludeMemberId=${this.member.id}`
+        );
+        if (res.data.inUse) {
+          return this.$t('validation.rfidAlreadyInUse', {
+            name: res.data.usedBy,
+          });
+        }
+        return true;
+      } catch {
+        return true;
+      }
     },
     saveChange(field: keyof typeof this.saved) {
       const formRef = this.$refs.formRef as typeof QForm;
