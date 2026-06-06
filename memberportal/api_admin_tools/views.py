@@ -619,6 +619,7 @@ class MemberProfile(APIView):
         member.profile.phone = body.get("phone")
         member.profile.screen_name = body.get("screenName")
         member.profile.vehicle_registration_plate = body.get("vehicleRegistrationPlate")
+        member.profile.discord_handle = body.get("discordHandle") or None
         member.profile.exclude_from_email_export = body.get("excludeFromEmailExport")
         member.profile.emergency_contact_name = body.get("emergencyContactName") or None
         member.profile.emergency_contact_phone = (
