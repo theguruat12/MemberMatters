@@ -740,6 +740,15 @@
               <div v-else>
                 {{ $t(`adminTools.noSubscription`) }}
               </div>
+
+              <q-btn
+                v-if="billing?.subscription?.status === 'active'"
+                color="negative"
+                :label="$t('adminTools.cancelMembership')"
+                :loading="cancelMembershipLoading"
+                :disable="cancelMembershipLoading"
+                @click="cancelMembership"
+              />
             </div>
 
             <div class="column q-gutter-y-sm full-width">
@@ -1592,6 +1601,7 @@ export default defineComponent({
       smsSendLoading: false,
       smsModalIsOpen: false,
       smsBody: '',
+      cancelMembershipLoading: false,
     };
   },
   beforeMount() {
@@ -1706,6 +1716,43 @@ export default defineComponent({
           setTimeout(() => {
             this.stateLoading = false;
           }, 1200);
+        });
+    },
+    cancelMembership() {
+      this.$q
+        .dialog({
+          title: this.$t('confirmAction'),
+          message: this.$t('adminTools.cancelMembershipConfirm'),
+          cancel: this.$t('button.back'),
+          persistent: true,
+        })
+        .onOk(() => {
+          this.cancelMembershipLoading = true;
+          this.$axios
+            .post(`/api/admin/members/${this.member.id}/billing/cancel/`)
+            .then((res) => {
+              if (res.data.success) {
+                this.$q.dialog({
+                  title: this.$t('actionSuccess'),
+                  message: this.$t('adminTools.cancelMembershipSuccess'),
+                });
+                this.getMemberBilling();
+              } else {
+                this.$q.dialog({
+                  title: this.$t('error.error'),
+                  message: this.$t('adminTools.cancelMembershipFailed'),
+                });
+              }
+            })
+            .catch(() => {
+              this.$q.dialog({
+                title: this.$t('error.error'),
+                message: this.$t('adminTools.cancelMembershipFailed'),
+              });
+            })
+            .finally(() => {
+              this.cancelMembershipLoading = false;
+            });
         });
     },
     getMemberLogs() {

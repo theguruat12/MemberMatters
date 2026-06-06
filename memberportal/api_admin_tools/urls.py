@@ -46,6 +46,11 @@ urlpatterns = [
         name="MemberBillingInfo",
     ),
     path(
+        "api/admin/members/<int:member_id>/billing/cancel/",
+        views.AdminCancelMembership.as_view(),
+        name="AdminCancelMembership",
+    ),
+    path(
         "api/admin/members/<int:member_id>/logs/",
         views.MemberLogs.as_view(),
         name="MemberLogs",
