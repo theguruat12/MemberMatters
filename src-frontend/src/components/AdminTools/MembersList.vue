@@ -116,7 +116,7 @@ import { copyToClipboard } from 'quasar';
 import icons from '@icons';
 import formatMixin from '@mixins/formatMixin';
 import { exportFile } from 'quasar';
-import { stringify } from 'csv-stringify';
+import { stringify } from 'csv-stringify/browser/esm/sync';
 import { mapGetters } from 'vuex';
 import { MemberProfile } from 'types/member';
 import { defineComponent } from 'vue';
@@ -233,24 +233,23 @@ export default defineComponent({
         });
     },
     exportCsv() {
-      console.log(this.displayMemberList);
-      stringify(
-        this.displayMemberList,
-        {
-          columns: ['name.full', 'email', 'state'],
-        },
-        (err, output) => {
-          const status = exportFile('member-export.csv', output, 'text/csv');
-
-          if (status !== true) {
-            this.$q.notify({
-              message: this.$t('error.downloadFailed'),
-              color: 'negative',
-              icon: 'warning',
-            });
-          }
-        }
-      );
+      const rows = this.displayMemberList.map((member: MemberProfile) => ({
+        name: member.name.full,
+        email: member.email,
+        state: member.state,
+      }));
+      const output = stringify(rows, {
+        header: true,
+        columns: ['name', 'email', 'state'],
+      });
+      const status = exportFile('member-export.csv', output, 'text/csv');
+      if (status !== true) {
+        this.$q.notify({
+          message: this.$t('error.downloadFailed'),
+          color: 'negative',
+          icon: 'warning',
+        });
+      }
     },
     copyEmailsToClipboard() {
       copyToClipboard(this.memberEmails)
