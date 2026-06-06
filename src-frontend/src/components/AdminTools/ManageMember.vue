@@ -152,6 +152,7 @@
                   :rules="[
                     (val) =>
                       validateNotEmpty(val) || $t('validation.cannotBeEmpty'),
+                      (val) => checkRfidUniqueness(val),
                   ]"
                   @update:model-value="saveChange('rfidCard')"
                 >
@@ -1456,6 +1457,24 @@ export default defineComponent({
       this.profileForm.vehicleRegistrationPlate =
         this.selectedMember.vehicleRegistrationPlate;
     },
+    async checkRfidUniqueness(val: string) {
+      if (!val) return true;
+      try {
+        const res = await this.$axios.get(
+          `/api/admin/rfid-check/?rfid=${encodeURIComponent(
+            val
+          )}&excludeMemberId=${this.member.id}`
+        );
+        if (res.data.inUse) {
+          return this.$t('validation.rfidAlreadyInUse', {
+            name: res.data.usedBy,
+          });
+        }
+        return true;
+      } catch {
+        return true;
+      }
+    },
     saveChange(field: keyof typeof this.saved) {
       const formRef = this.$refs.formRef as typeof QForm;
       formRef.validate(false).then(() => {
@@ -1483,6 +1502,29 @@ export default defineComponent({
                   this.saved.error = false;
                 }, 1500);
               });
+    onSubmit() {
+      this.success = false;
+      this.genericError = false;
+      this.errorMessageKey = null;
+      this.saving = true;
+
+      this.$axios
+        .put(`/api/admin/members/${this.member.id}/profile/`, {
+          ...this.profileForm,
+          phone: this.toE164Phone(this.profileForm.phone),
+          excludeFromEmailExport: this.selectedMember.excludeFromEmailExport,
+        })
+        .then(() => {
+          this.success = true;
+          this.$emit('memberUpdated');
+        })
+        .catch((err) => {
+          const message = err?.response?.data?.message;
+          const status = err?.response?.status;
+          if ((status === 409 || status === 400) && message) {
+            this.errorMessageKey = message;
+          } else {
+            this.genericError = true;
           }
         });
       });

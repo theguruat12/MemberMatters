@@ -554,6 +554,32 @@ class MemberSendSms(APIView):
         return Response()
 
 
+class RFIDCheck(APIView):
+    """
+    get: Checks whether an RFID value is already assigned to another member.
+    """
+
+    permission_classes = (permissions.IsAdminUser,)
+
+    def get(self, request):
+        rfid = request.GET.get("rfid", "").strip()
+        exclude_member_id = request.GET.get("excludeMemberId")
+
+        if not rfid:
+            return Response({"inUse": False})
+
+        query = Profile.objects.filter(rfid=rfid)
+        if exclude_member_id:
+            query = query.exclude(user_id=exclude_member_id)
+
+        existing = query.first()
+        if existing:
+            return Response({"inUse": True, "usedBy": existing.get_full_name()})
+
+        return Response({"inUse": False})
+
+
+
 class MemberProfile(APIView):
     """
     put: This method updates a member's profile.
@@ -567,10 +593,21 @@ class MemberProfile(APIView):
 
         body = json.loads(request.body)
         member = User.objects.get(id=member_id)
-        rfid_changed = False
 
-        if member.profile.rfid != body.get("rfidCard"):
-            rfid_changed = True
+        rfid = (body.get("rfidCard") or "").strip() or None
+        rfid_changed = member.profile.rfid != rfid
+
+        if (
+            rfid
+            and rfid_changed
+            and Profile.objects.filter(rfid=rfid)
+            .exclude(user_id=member_id)
+            .exists()
+        ):
+            return Response(
+                {"message": "validation.rfidAlreadyInUse"},
+                status=status.HTTP_409_CONFLICT,
+            )
 
         member.email = body.get("email")
         member.profile.first_name = body.get("firstName")
