@@ -620,6 +620,13 @@ class MemberProfile(APIView):
         member.profile.screen_name = body.get("screenName")
         member.profile.vehicle_registration_plate = body.get("vehicleRegistrationPlate")
         member.profile.exclude_from_email_export = body.get("excludeFromEmailExport")
+        member.profile.emergency_contact_name = body.get("emergencyContactName") or None
+        member.profile.emergency_contact_phone = (
+            body.get("emergencyContactPhone") or None
+        )
+        member.profile.emergency_contact_relationship = (
+            body.get("emergencyContactRelationship") or None
+        )
 
         member.save()
         member.profile.save()

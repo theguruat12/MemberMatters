@@ -36,6 +36,9 @@ export const MemberProfileSchema = z.object({
   updateProfileRequired: z.boolean(),
   lastSeen: z.string().nullable(),
   lastInduction: z.string().nullable(),
+  emergencyContactName: z.string().nullable(),
+  emergencyContactPhone: z.string().nullable(),
+  emergencyContactRelationship: z.string().nullable(),
   stripe: z.object({
     cardExpiry: z.string(),
     last4: z.string(),
