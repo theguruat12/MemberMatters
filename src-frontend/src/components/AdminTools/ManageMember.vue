@@ -152,7 +152,9 @@
                   :rules="[
                     (val) =>
                       validateNotEmpty(val) || $t('validation.cannotBeEmpty'),
-                      (val) => checkRfidUniqueness(val),
+                    (val) =>
+                      /^\d+$/.test(val) || $t('validation.rfidMustBeNumeric'),
+                    (val) => checkRfidUniqueness(val),
                   ]"
                   @update:model-value="saveChange('rfidCard')"
                 >
@@ -1502,29 +1504,6 @@ export default defineComponent({
                   this.saved.error = false;
                 }, 1500);
               });
-    onSubmit() {
-      this.success = false;
-      this.genericError = false;
-      this.errorMessageKey = null;
-      this.saving = true;
-
-      this.$axios
-        .put(`/api/admin/members/${this.member.id}/profile/`, {
-          ...this.profileForm,
-          phone: this.toE164Phone(this.profileForm.phone),
-          excludeFromEmailExport: this.selectedMember.excludeFromEmailExport,
-        })
-        .then(() => {
-          this.success = true;
-          this.$emit('memberUpdated');
-        })
-        .catch((err) => {
-          const message = err?.response?.data?.message;
-          const status = err?.response?.status;
-          if ((status === 409 || status === 400) && message) {
-            this.errorMessageKey = message;
-          } else {
-            this.genericError = true;
           }
         });
       });

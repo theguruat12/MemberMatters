@@ -1,5 +1,6 @@
 from asgiref.sync import sync_to_async
 from django.http import HttpRequest
+from django.db import transaction, IntegrityError
 
 from profile.models import Profile
 from access.models import Doors, Interlock
@@ -371,10 +372,91 @@ class AssignAccessCard(APIView):
     """
 
     def post(self, request):
-        profile = request.user.profile
-        profile.rfid = request.data["accessCard"]
-        profile.save()
+        if not config.MEMBER_CAN_ENTER_ACCESS_CARD:
+            return Response(
+                {"success": False, "message": "accessCard.memberEntryDisabled"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
+        access_card = (request.data.get("accessCard") or "").strip()
+        if not access_card:
+            return Response(
+                {"success": False, "message": "accessCard.required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not access_card.isdigit():
+            return Response(
+                {"success": False, "message": "accessCard.mustBeNumeric"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Lock + re-read so a concurrent admin (state/rfid mutation) or
+        # the same user double-submitting can't slip writes past these
+        # checks. The cross-profile RFID-collision case is still caught
+        # by the unique constraint below — locks on different rows don't
+        # help there.
+        with transaction.atomic():
+            locked_profile = Profile.objects.select_for_update().get(
+                pk=request.user.profile.pk
+            )
+
+            if locked_profile.state not in ("noob", "accountonly"):
+                request.user.log_event(
+                    f"Member tried to self-rebind RFID while state={locked_profile.state}; refused.",
+                    "profile",
+                )
+                return Response(
+                    {"success": False, "message": "accessCard.adminRebindRequired"},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+
+            if locked_profile.rfid:
+                request.user.log_event(
+                    "Member tried to self-rebind RFID but one is already set; refused.",
+                    "profile",
+                )
+                return Response(
+                    {"success": False, "message": "accessCard.alreadyBound"},
+                    status=status.HTTP_409_CONFLICT,
+                )
+
+            if (
+                Profile.objects.filter(rfid=access_card)
+                .exclude(pk=locked_profile.pk)
+                .exists()
+            ):
+                request.user.log_event(
+                    "Member tried to bind an RFID already held by another member; refused.",
+                    "profile",
+                )
+                return Response(
+                    {"success": False, "message": "accessCard.alreadyInUse"},
+                    status=status.HTTP_409_CONFLICT,
+                )
+
+            locked_profile.rfid = access_card
+            try:
+                locked_profile.save(update_fields=["rfid"])
+            except IntegrityError:
+                # Cross-profile race: another member's request committed
+                # the same RFID between our pre-check and our save. The
+                # DB unique constraint is the authoritative gate; surface
+                # the same 409 the pre-check would have.
+                request.user.log_event(
+                    "Member tried to bind an RFID already held by another member; "
+                    "refused (race lost on unique constraint).",
+                    "profile",
+                )
+                return Response(
+                    {"success": False, "message": "accessCard.alreadyInUse"},
+                    status=status.HTTP_409_CONFLICT,
+                )
+
+        request.user.log_event(
+            "Member self-bound RFID.",
+            "profile",
+        )
         return Response({"success": True})
 
 

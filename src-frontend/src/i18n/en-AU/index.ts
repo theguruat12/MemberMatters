@@ -187,6 +187,7 @@ export default {
     invalidPhone: 'Please enter a valid phone number.',
     passwordNotMatch: "Sorry, but your passwords don't match.",
     cannotBeEmpty: 'This field cannot be empty.',
+    rfidMustBeNumeric: 'RFID tag must contain digits only.',
     futureDate: 'Date must be today or in the future.',
     tooMany: 'Sorry, the maximum is {number}.',
     rfidAlreadyInUse: 'RFID is already assigned to {name}.',
@@ -601,6 +602,24 @@ export default {
       'Sorry, but there was a problem creating your subscription. Please check the card you used had enough funds, try again, or contact us for help.',
     existingMemberSubscription:
       'Sorry, you already have an active Stripe subscription.',
+    skipNotAllowed:
+      "You can't skip signup while you have an active or pending membership subscription. Please cancel your subscription from the membership page first.",
+    noMoodleAccount:
+      "We couldn't find a Moodle account matching your email address. Please make sure you've created your Moodle account using the same email you used to sign up here, then try again.",
+    moodleUnavailable:
+      "We couldn't reach Moodle to check your induction progress. Please try again in a moment, or contact us if the problem persists.",
+  },
+  accessCard: {
+    memberEntryDisabled:
+      'Self-service access card registration is currently disabled. Please contact us to have your card registered.',
+    required: 'Please enter an access card number.',
+    adminRebindRequired:
+      "You can't change your own access card after activation. Please contact us if your card needs to be replaced.",
+    alreadyBound:
+      'You already have an access card registered. Please contact us if it needs to be replaced.',
+    alreadyInUse:
+      "That access card is already registered to another member. Please double-check the number, or contact us if you think it's a mistake.",
+    mustBeNumeric: 'Access card number must contain digits only.',
   },
   tiers: {
     disabledFeature:
