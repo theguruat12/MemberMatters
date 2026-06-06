@@ -62,7 +62,7 @@
               dense
               debounce="300"
               placeholder="Search"
-              class="q-mt-none q-pt-none"
+              class="q-mt-none q-pt-none search-input"
             >
               <template v-slot:append>
                 <q-icon :name="icons.search" />
@@ -92,6 +92,7 @@
 </template>
 
 <script>
+import { useCtrlF } from 'src/composables/search';
 import { mapActions, mapGetters } from 'vuex';
 import MemberBucksAddFunds from '@components/MemberBucksAddFunds.vue';
 import MemberBucksDonateFunds from '@components/MemberBucksDonateFunds.vue';
@@ -99,6 +100,7 @@ import icons from '../icons';
 import formatMixin from '../mixins/formatMixin';
 
 export default {
+  setup() {useCtrlF('.search-input input');},
   name: 'MemberBucks',
   mixins: [formatMixin],
   props: {

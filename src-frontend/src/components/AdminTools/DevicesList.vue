@@ -15,6 +15,7 @@
         dense
         debounce="300"
         placeholder="Search"
+        class="search-input"
       >
         <template v-slot:append>
           <q-icon :name="icons.search" />
@@ -148,11 +149,13 @@
 </template>
 
 <script>
+import { useCtrlF } from 'src/composables/search';
 import icons from '../../icons';
 import formatMixin from 'src/mixins/formatMixin';
 import { mapGetters } from 'vuex';
 
 export default {
+  setup() {useCtrlF('.search-input input');},
   props: {
     deviceChoice: {
       type: String,

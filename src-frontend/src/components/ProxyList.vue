@@ -39,6 +39,7 @@
         dense
         debounce="300"
         placeholder="Search"
+        class="search-input"
       >
         <template #append>
           <q-icon :name="icons.search" />
@@ -111,12 +112,14 @@
 </template>
 
 <script>
+import { useCtrlF } from 'src/composables/search';
 import { mapActions, mapGetters } from 'vuex';
 import icons from '../icons';
 import formatMixin from '../mixins/formatMixin';
 import ProxyForm from './ProxyForm.vue';
 
 export default {
+  setup() {useCtrlF('.search-input input');},
   name: 'ProxyList',
   components: { ProxyForm },
   mixins: [formatMixin],
