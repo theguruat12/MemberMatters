@@ -371,8 +371,15 @@ class AssignAccessCard(APIView):
     """
 
     def post(self, request):
+        access_card = request.data.get("accessCard", "")
+        if not str(access_card).isdigit():
+            return Response(
+                {"success": False, "message": "RFID tag must be numeric."},
+                status=400,
+            )
+
         profile = request.user.profile
-        profile.rfid = request.data["accessCard"]
+        profile.rfid = access_card
         profile.save()
 
         return Response({"success": True})

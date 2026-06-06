@@ -188,6 +188,7 @@ export default {
     invalidPhone: 'Please enter a valid phone number.',
     passwordNotMatch: "Sorry, but your passwords don't match.",
     cannotBeEmpty: 'This field cannot be empty.',
+    rfidMustBeNumeric: 'RFID tag must contain digits only.',
     futureDate: 'Date must be today or in the future.',
     tooMany: 'Sorry, the maximum is {number}.',
     rfidAlreadyInUse: 'RFID is already assigned to {name}.',
