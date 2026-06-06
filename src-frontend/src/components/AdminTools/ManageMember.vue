@@ -153,7 +153,9 @@
                     (val) =>
                       validateNotEmpty(val) || $t('validation.cannotBeEmpty'),
                     (val) =>
-                      /^\d+$/.test(val) || $t('validation.rfidMustBeNumeric'),
+                      !val ||
+                      /^\d+$/.test(val) ||
+                      $t('validation.rfidMustBeNumeric'),
                     (val) => checkRfidUniqueness(val),
                   ]"
                   @update:model-value="saveChange('rfidCard')"
