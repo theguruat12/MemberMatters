@@ -10,6 +10,9 @@ export default {
     validateNotEmpty(value: string) {
       return value !== null && value !== '';
     },
+    validatePhone(value: string) {
+      return (value?.match(/\d/g) || []).length >= 8;
+    },
     validatePassword(value: string) {
       return value.length > 7;
     },

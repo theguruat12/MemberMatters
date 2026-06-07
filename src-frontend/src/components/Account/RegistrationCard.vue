@@ -119,6 +119,7 @@
               :rules="[
                 (val) =>
                   validateNotEmpty(val) || $t('validation.cannotBeEmpty'),
+                (val) => validatePhone(val) || $t('validation.invalidPhone'),
               ]"
             />
             <q-input

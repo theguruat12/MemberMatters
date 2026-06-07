@@ -143,6 +143,7 @@
         :label="$t('form.emergencyContactPhone')"
         :rules="[
           (val) => validateNotEmpty(val) || $t('validation.cannotBeEmpty'),
+          (val) => validatePhone(val) || $t('validation.invalidPhone'),
         ]"
         @update:model-value="saveChange('emergencyContactPhone')"
       >
