@@ -371,10 +371,15 @@ class AssignAccessCard(APIView):
     """
 
     def post(self, request):
-        access_card = request.data.get("accessCard", "")
-        if not str(access_card).isdigit():
+        access_card = str(request.data.get("accessCard", ""))
+        if not access_card.isdigit():
             return Response(
                 {"success": False, "message": "RFID tag must be numeric."},
+                status=400,
+            )
+        if len(access_card) > 8:
+            return Response(
+                {"success": False, "message": "RFID tag must be 8 digits or fewer."},
                 status=400,
             )
 
