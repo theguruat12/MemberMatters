@@ -1,6 +1,7 @@
 from access.models import (
     Doors,
     Interlock,
+    InterlockAccessGrant,
     MemberbucksDevice,
     HasExternalAccessControlAPIKey,
 )
@@ -158,8 +159,11 @@ class AuthoriseInterlock(APIView):
         member = User.objects.get(pk=user_id)
         interlock = Interlock.objects.get(pk=interlock_id)
 
-        member.profile.interlocks.add(interlock)
-        member.profile.save()
+        InterlockAccessGrant.objects.get_or_create(
+            profile=member.profile,
+            interlock=interlock,
+            defaults={"granted_by": request.user},
+        )
         interlock.sync()
 
         return Response()
@@ -194,8 +198,9 @@ class RevokeInterlock(APIView):
         member = User.objects.get(pk=user_id)
         interlock = Interlock.objects.get(pk=interlock_id)
 
-        member.profile.interlocks.remove(interlock)
-        member.profile.save()
+        InterlockAccessGrant.objects.filter(
+            profile=member.profile, interlock=interlock
+        ).delete()
         interlock.sync()
 
         return Response()

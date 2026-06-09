@@ -1,6 +1,7 @@
 import factory
 from django.contrib.auth import get_user_model
 
+from access.models import Interlock, InterlockAccessGrant
 from profile.models import Profile
 
 User = get_user_model()
@@ -49,3 +50,18 @@ class MemberFactory(_UserFactory):
             last_name="Member",
         )
         return user
+
+
+class InterlockFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Interlock
+
+    name = "Laser Cutter"
+    description = ""
+
+
+class InterlockAccessGrantFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = InterlockAccessGrant
+
+    role = factory.LazyAttribute(lambda _: InterlockAccessGrant.ROLE_USER)

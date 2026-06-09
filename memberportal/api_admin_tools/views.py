@@ -17,7 +17,7 @@ from sentry_sdk import capture_exception
 from sentry_sdk import capture_message
 
 from access import models
-from access.models import DoorLog, InterlockLog
+from access.models import DoorLog, InterlockLog, InterlockAccessGrant
 from memberbucks.models import (
     MemberBucks,
     MemberbucksProductPurchaseLog,
@@ -107,7 +107,11 @@ class MakeMember(APIView):
 
             # give default interlock access
             for interlock in models.Interlock.objects.filter(all_members=True):
-                user.profile.interlocks.add(interlock)
+                InterlockAccessGrant.objects.get_or_create(
+                    profile=user.profile,
+                    interlock=interlock,
+                    defaults={"granted_by": request.user},
+                )
 
             # send the welcome email
             email = user.email_welcome()
@@ -345,6 +349,22 @@ class Interlocks(APIView):
                 "hiddenToMembers": interlock.hidden,
                 "totalTimeSeconds": total_time_seconds,
                 "userStats": list(stats),
+                "authorisedMembers": [
+                    {
+                        "userId": g.profile.user.id,
+                        "name": g.profile.get_full_name(),
+                        "role": "user",
+                        "grantedBy": (
+                            g.granted_by.profile.get_full_name()
+                            if g.granted_by
+                            else None
+                        ),
+                        "grantedDate": g.granted_date,
+                    }
+                    for g in InterlockAccessGrant.objects.filter(
+                        interlock=interlock
+                    ).select_related("profile__user", "granted_by__profile")
+                ],
             }
 
         return Response(map(get_interlock, interlocks))
@@ -386,11 +406,15 @@ class Interlocks(APIView):
 
             for member in members:
                 if all_members_added:
-                    member.profile.interlocks.add(interlock)
+                    InterlockAccessGrant.objects.get_or_create(
+                        profile=member.profile,
+                        interlock=interlock,
+                        defaults={"granted_by": None},
+                    )
                 else:
-                    member.profile.interlocks.remove(interlock)
-
-                member.profile.save()
+                    InterlockAccessGrant.objects.filter(
+                        profile=member.profile, interlock=interlock
+                    ).delete()
 
         if (
             all_members_added

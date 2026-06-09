@@ -18,6 +18,9 @@ from django.utils import timezone
 import pytz
 from django.conf import settings
 from django.contrib import auth
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 import uuid
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
@@ -565,3 +568,35 @@ class InterlockLog(ExportModelOperationsMixin("interlock-log"), models.Model):
             )
 
             return True
+
+
+class InterlockAccessGrant(
+    ExportModelOperationsMixin("interlock-access-grant"), models.Model
+):
+    """Records when and by whom a member was granted access to an interlock."""
+
+    profile = models.ForeignKey(
+        "profile.Profile",
+        on_delete=models.CASCADE,
+        related_name="interlock_grants",
+    )
+    interlock = models.ForeignKey(
+        Interlock,
+        on_delete=models.CASCADE,
+        related_name="access_grants",
+    )
+    granted_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="interlock_grants_given",
+    )
+    granted_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [("profile", "interlock")]
+
+    def __str__(self):
+        granter = self.granted_by.email if self.granted_by else "system"
+        return f"{self.profile} → {self.interlock.name} (by {granter})"

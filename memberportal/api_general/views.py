@@ -1,3 +1,4 @@
+import os
 import sentry_sdk
 from django.contrib.auth import (
     authenticate,
@@ -65,7 +66,10 @@ class GetConfig(APIView):
 
         keys = {"stripePublishableKey": config.STRIPE_PUBLISHABLE_KEY}
 
-        with open("../package.json") as f:
+        _pkg_path = os.path.join(
+            os.path.dirname(__file__), "..", "..", "src-frontend", "package.json"
+        )
+        with open(_pkg_path) as f:
             package = json.load(f)
             version = package.get("version")
 
