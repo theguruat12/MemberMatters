@@ -12,6 +12,7 @@ export type PageAndRouteConfigType = {
   backButton?: boolean | string;
   hiddenMenu?: boolean;
   featureEnabledFlag?: string;
+  profileFlag?: string;
   bgGradient?: boolean;
   memberOnly?: boolean;
   children?: PageAndRouteConfigType[];
@@ -55,6 +56,15 @@ const PageAndRouteConfig: PageAndRouteConfigType[] = [
     kiosk: true,
     featureEnabledFlag: 'enableWebcams',
     component: () => import('pages/Webcams.vue'),
+  },
+  {
+    icon: icons.interlocks,
+    to: '/manage/my-interlocks',
+    name: 'manageInterlocks',
+    loggedIn: true,
+    memberOnly: true,
+    profileFlag: 'isInterlockManager',
+    component: () => import('pages/ManageInterlocks.vue'),
   },
   {
     icon: icons.admintools,

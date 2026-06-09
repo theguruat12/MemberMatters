@@ -78,15 +78,23 @@ export default {
       type: String,
       default: '',
     },
+    profileFlag: {
+      type: String,
+      default: '',
+    },
   },
   computed: {
-    ...mapGetters('profile', ['loggedIn']),
+    ...mapGetters('profile', ['loggedIn', 'profile']),
     ...mapGetters('config', ['features']),
     linkVisible() {
-      return !(
+      if (
         this.featureEnabledFlag.length &&
         this.features[this.featureEnabledFlag] === false
-      );
+      )
+        return false;
+      if (this.profileFlag.length && !this.profile?.[this.profileFlag])
+        return false;
+      return true;
     },
     visibleLinks() {
       return this.children.filter((link) => {

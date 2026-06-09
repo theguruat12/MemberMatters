@@ -17,6 +17,7 @@ const menuRoutes: RouteRecordRaw[] = mainMenu.map(
           meta: {
             title: child.name,
             featureEnabledFlag: child.featureEnabledFlag,
+            profileFlag: child.profileFlag,
             loggedIn: child.loggedIn,
             kiosk: child.kiosk,
             backButton: child.backButton,
@@ -36,6 +37,7 @@ const menuRoutes: RouteRecordRaw[] = mainMenu.map(
         meta: {
           title: menuItem.name,
           featureEnabledFlag: menuItem.featureEnabledFlag,
+          profileFlag: menuItem.profileFlag,
           loggedIn: menuItem.loggedIn,
           kiosk: menuItem.kiosk,
           backButton: menuItem.backButton,
@@ -55,6 +57,7 @@ const menuRoutes: RouteRecordRaw[] = mainMenu.map(
       meta: {
         title: menuItem.name,
         featureEnabledFlag: menuItem.featureEnabledFlag,
+        profileFlag: menuItem.profileFlag,
         loggedIn: menuItem.loggedIn,
         kiosk: menuItem.kiosk,
         backButton: menuItem.backButton,

@@ -17,6 +17,9 @@ from rest_framework import status, permissions, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Kiosk, SiteSession, EmailVerificationToken
+from access.models import (
+    InterlockAccessGrant,
+)
 from services.discord import post_kiosk_swipe_to_discord
 from services.slack import post_kiosk_swipe_to_slack
 import base64
@@ -415,6 +418,10 @@ class ProfileDetail(generics.GenericAPIView):
                 "subscriptionState": p.subscription_status,
             },
             "permissions": {"staff": user.is_staff},
+            "isInterlockManager": InterlockAccessGrant.objects.filter(
+                profile=p,
+                role=InterlockAccessGrant.ROLE_TRAINER,
+            ).exists(),
         }
 
         return Response(response)

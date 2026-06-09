@@ -214,6 +214,9 @@ export default defineComponent({
         if (link.admin && !this.profile?.permissions?.staff) {
           displayLink = false;
         }
+        if (link.profileFlag && !this.profile?.[link.profileFlag]) {
+          displayLink = false;
+        }
 
         return displayLink;
       });
