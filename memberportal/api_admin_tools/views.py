@@ -281,11 +281,27 @@ class Doors(APIView):
 class Interlocks(APIView):
     """
     get: returns a list of interlocks.
+    post: create a new interlock.
     put: update a specific interlock.
     delete: delete a specific interlock.
     """
 
     permission_classes = (permissions.IsAdminUser,)
+
+    def post(self, request):
+        data = request.data
+        name = data.get("name", "").strip()
+        if not name:
+            return Response(
+                {"error": "Name is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        interlock = models.Interlock.objects.create(
+            name=name,
+            description=data.get("description", ""),
+            ip_address=data.get("ipAddress") or None,
+        )
+        return Response({"id": interlock.id}, status=status.HTTP_201_CREATED)
 
     def get(self, request):
         interlocks = models.Interlock.objects.all()

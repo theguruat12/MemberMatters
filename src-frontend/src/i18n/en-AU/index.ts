@@ -646,6 +646,9 @@ export default {
     ipAddress: 'Interlock IP Address',
     inProgress: 'In Progress',
     finished: 'Finished',
+    create: 'Add Interlock',
+    createSuccess: 'Interlock created successfully.',
+    createFail: 'Failed to create interlock.',
   },
   'memberbucks-devices': {
     nodata: 'There are no spacebucks devices in the system.',
