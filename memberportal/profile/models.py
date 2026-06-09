@@ -634,6 +634,7 @@ class Profile(ExportModelOperationsMixin("profile"), models.Model):
                         "id": interlock.id,
                         "locked_out": interlock.locked_out,
                         "offline": interlock.get_unavailable(),
+                        "role": grant.role,
                         "grantedBy": (
                             granter.profile.get_full_name() if granter else None
                         ),
@@ -648,6 +649,7 @@ class Profile(ExportModelOperationsMixin("profile"), models.Model):
                         "id": interlock.id,
                         "locked_out": interlock.locked_out,
                         "offline": interlock.get_unavailable(),
+                        "role": None,
                         "grantedBy": None,
                         "grantedDate": None,
                     }

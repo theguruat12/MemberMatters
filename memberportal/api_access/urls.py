@@ -32,6 +32,28 @@ urlpatterns = [
         views.RevokeInterlock.as_view(),
         name="RevokeInterlock",
     ),
+    # Interlock trainer role assignment (admin only)
+    path(
+        "api/access/interlocks/<int:interlock_id>/assign-trainer/<int:user_id>/",
+        views.AssignInterlockTrainer.as_view(),
+        name="AssignInterlockTrainer",
+    ),
+    path(
+        "api/access/interlocks/<int:interlock_id>/revoke-trainer/<int:user_id>/",
+        views.RevokeInterlockTrainer.as_view(),
+        name="RevokeInterlockTrainer",
+    ),
+    # Trainer managed interlocks view + member search
+    path(
+        "api/access/interlocks/managed/",
+        views.ManagedInterlocks.as_view(),
+        name="ManagedInterlocks",
+    ),
+    path(
+        "api/access/members/search/",
+        views.MemberSearch.as_view(),
+        name="MemberSearch",
+    ),
     path(
         "api/access/interlocks/<int:interlock_id>/reboot/",
         views.RebootInterlock.as_view(),

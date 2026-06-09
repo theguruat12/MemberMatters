@@ -221,3 +221,39 @@ def test_interlock_access_grant_str_no_granter(member, interlock):
         profile=member.profile, interlock=interlock
     )
     assert "system" in str(grant)
+
+
+def test_interlock_access_grant_role_level_user(member, interlock):
+    grant = InterlockAccessGrant.objects.create(
+        profile=member.profile,
+        interlock=interlock,
+        role=InterlockAccessGrant.ROLE_USER,
+    )
+    assert grant.role_level == InterlockAccessGrant.LEVEL_USER
+
+
+def test_interlock_access_grant_role_level_trainer(member, interlock):
+    grant = InterlockAccessGrant.objects.create(
+        profile=member.profile,
+        interlock=interlock,
+        role=InterlockAccessGrant.ROLE_TRAINER,
+    )
+    assert grant.role_level == InterlockAccessGrant.LEVEL_TRAINER
+
+
+def test_authorise_updates_granted_by_on_existing_user_grant(
+    api_client, admin, member, interlock
+):
+    admin2 = AdminFactory.create(email="admin2b@test.com")
+    InterlockAccessGrant.objects.create(
+        profile=member.profile,
+        interlock=interlock,
+        granted_by=admin,
+        role=InterlockAccessGrant.ROLE_USER,
+    )
+    api_client.force_authenticate(user=admin2)
+    api_client.put(_authorise_url(interlock.id, member.id))
+    grant = InterlockAccessGrant.objects.get(
+        profile=member.profile, interlock=interlock
+    )
+    assert grant.granted_by == admin2

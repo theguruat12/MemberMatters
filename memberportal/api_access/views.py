@@ -13,6 +13,21 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from constance import config
 
+from api_access.permissions import IsInterlockTrainer, IsAnyInterlockTrainer
+
+
+def _caller_role_level(request, interlock_id):
+    """Return the numeric role level for the calling user on a given interlock (0 = no access)."""
+    if request.user.is_staff:
+        return InterlockAccessGrant.LEVEL_STAFF
+    try:
+        grant = InterlockAccessGrant.objects.get(
+            profile=request.user.profile, interlock_id=interlock_id
+        )
+        return grant.role_level
+    except InterlockAccessGrant.DoesNotExist:
+        return InterlockAccessGrant.LEVEL_NONE
+
 
 class AccessSystemStatus(APIView):
     """
@@ -150,22 +165,29 @@ class AuthoriseDoor(APIView):
 
 class AuthoriseInterlock(APIView):
     """
-    put: This method authorises a member to access an interlock.
+    put: Grants a member user-level access to an interlock.
+    Allowed by: admin, interlock trainer.
     """
 
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (permissions.IsAdminUser | IsInterlockTrainer,)
 
     def put(self, request, interlock_id, user_id):
         member = User.objects.get(pk=user_id)
         interlock = Interlock.objects.get(pk=interlock_id)
 
-        InterlockAccessGrant.objects.get_or_create(
+        grant, created = InterlockAccessGrant.objects.get_or_create(
             profile=member.profile,
             interlock=interlock,
-            defaults={"granted_by": request.user},
+            defaults={
+                "granted_by": request.user,
+                "role": InterlockAccessGrant.ROLE_USER,
+            },
         )
-        interlock.sync()
+        if not created and grant.role == InterlockAccessGrant.ROLE_USER:
+            grant.granted_by = request.user
+            grant.save(update_fields=["granted_by"])
 
+        interlock.sync()
         return Response()
 
 
@@ -189,7 +211,71 @@ class RevokeDoor(APIView):
 
 class RevokeInterlock(APIView):
     """
-    post: This method revokes a member's access to an interlock.
+    put: Removes a member's access to an interlock.
+    Trainers may only revoke user-level grants; admins can revoke any grant.
+    """
+
+    permission_classes = (permissions.IsAdminUser | IsInterlockTrainer,)
+
+    def put(self, request, interlock_id, user_id):
+        member = User.objects.get(pk=user_id)
+        interlock = Interlock.objects.get(pk=interlock_id)
+
+        try:
+            target_grant = InterlockAccessGrant.objects.get(
+                profile=member.profile, interlock=interlock
+            )
+        except InterlockAccessGrant.DoesNotExist:
+            return Response()
+
+        caller_level = _caller_role_level(request, interlock_id)
+        if caller_level <= target_grant.role_level:
+            return Response(
+                {"error": "You do not have permission to revoke this member's access."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        target_grant.delete()
+        interlock.sync()
+        return Response()
+
+
+# ---------------------------------------------------------------------------
+# Interlock trainer role assignment — admin only
+# ---------------------------------------------------------------------------
+
+
+class AssignInterlockTrainer(APIView):
+    """
+    put: Assigns trainer role to a member. Admin only.
+    """
+
+    permission_classes = (permissions.IsAdminUser,)
+
+    def put(self, request, interlock_id, user_id):
+        member = User.objects.get(pk=user_id)
+        interlock = Interlock.objects.get(pk=interlock_id)
+
+        grant, _ = InterlockAccessGrant.objects.get_or_create(
+            profile=member.profile,
+            interlock=interlock,
+            defaults={
+                "granted_by": request.user,
+                "role": InterlockAccessGrant.ROLE_TRAINER,
+            },
+        )
+        if grant.role != InterlockAccessGrant.ROLE_TRAINER:
+            grant.role = InterlockAccessGrant.ROLE_TRAINER
+            grant.granted_by = request.user
+            grant.save(update_fields=["role", "granted_by"])
+
+        interlock.sync()
+        return Response()
+
+
+class RevokeInterlockTrainer(APIView):
+    """
+    put: Revokes trainer role, downgrading to regular user access. Admin only.
     """
 
     permission_classes = (permissions.IsAdminUser,)
@@ -199,11 +285,106 @@ class RevokeInterlock(APIView):
         interlock = Interlock.objects.get(pk=interlock_id)
 
         InterlockAccessGrant.objects.filter(
-            profile=member.profile, interlock=interlock
-        ).delete()
-        interlock.sync()
+            profile=member.profile,
+            interlock=interlock,
+            role=InterlockAccessGrant.ROLE_TRAINER,
+        ).update(role=InterlockAccessGrant.ROLE_USER, granted_by=request.user)
 
+        interlock.sync()
         return Response()
+
+
+# ---------------------------------------------------------------------------
+# Managed interlocks — for trainers to view and manage their interlocks
+# ---------------------------------------------------------------------------
+
+
+class ManagedInterlocks(APIView):
+    """
+    get: Returns interlocks where the caller is a trainer, with member lists.
+    """
+
+    def get(self, request):
+        my_grants = InterlockAccessGrant.objects.filter(
+            profile=request.user.profile,
+            role=InterlockAccessGrant.ROLE_TRAINER,
+        ).select_related("interlock")
+
+        result = []
+        for my_grant in my_grants:
+            interlock = my_grant.interlock
+            all_grants = (
+                InterlockAccessGrant.objects.filter(interlock=interlock)
+                .select_related("profile__user", "granted_by__profile")
+                .order_by("role", "granted_date")
+            )
+
+            users = []
+            trainers = []
+            for g in all_grants:
+                entry = {
+                    "userId": g.profile.user.id,
+                    "name": g.profile.get_full_name(),
+                    "email": g.profile.user.email,
+                    "role": g.role,
+                    "grantedBy": (
+                        g.granted_by.profile.get_full_name() if g.granted_by else None
+                    ),
+                    "grantedDate": g.granted_date,
+                }
+                if g.role == InterlockAccessGrant.ROLE_TRAINER:
+                    trainers.append(entry)
+                else:
+                    users.append(entry)
+
+            result.append(
+                {
+                    "id": interlock.id,
+                    "name": interlock.name,
+                    "myRole": my_grant.role,
+                    "users": users,
+                    "trainers": trainers,
+                }
+            )
+
+        return Response(result)
+
+
+class MemberSearch(APIView):
+    """
+    get: Returns basic member info matching the search query. Accessible to
+    admins and any user who is a trainer on at least one interlock.
+    """
+
+    permission_classes = (permissions.IsAdminUser | IsAnyInterlockTrainer,)
+
+    def get(self, request):
+        from django.db.models import Q
+        from profile.models import Profile
+
+        q = request.GET.get("q", "").strip()
+        if len(q) < 2:
+            return Response([])
+
+        profiles = (
+            Profile.objects.filter(
+                Q(first_name__icontains=q)
+                | Q(last_name__icontains=q)
+                | Q(user__email__icontains=q)
+            )
+            .select_related("user")
+            .order_by("first_name", "last_name")[:20]
+        )
+        return Response(
+            [
+                {
+                    "id": p.user.id,
+                    "name": p.get_full_name(),
+                    "email": p.user.email,
+                }
+                for p in profiles
+            ]
+        )
 
 
 class RebootInterlock(APIView):

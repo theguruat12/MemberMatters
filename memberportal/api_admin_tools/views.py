@@ -353,7 +353,7 @@ class Interlocks(APIView):
                     {
                         "userId": g.profile.user.id,
                         "name": g.profile.get_full_name(),
-                        "role": "user",
+                        "role": g.role,
                         "grantedBy": (
                             g.granted_by.profile.get_full_name()
                             if g.granted_by
