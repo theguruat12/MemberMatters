@@ -286,7 +286,7 @@
                 dense
                 size="sm"
                 color="blue"
-                icon="add"
+                :icon="icons.addAlternative"
                 :label="$t('access.assignTrainer')"
                 @click="openRoleAssign('trainer')"
               />
@@ -309,7 +309,7 @@
                     flat
                     dense
                     round
-                    icon="person_remove"
+                    icon="mdi-account-remove"
                     color="negative"
                     size="sm"
                     @click="revokeRole(m.userId, 'trainer')"
@@ -335,7 +335,7 @@
                 dense
                 size="sm"
                 color="green"
-                icon="add"
+                :icon="icons.addAlternative"
                 :label="$t('access.grantAccess')"
                 @click="openRoleAssign('user')"
               />
@@ -358,7 +358,7 @@
                     flat
                     dense
                     round
-                    icon="person_remove"
+                    icon="mdi-account-remove"
                     color="negative"
                     size="sm"
                     @click="revokeRole(m.userId, 'user')"
@@ -378,7 +378,7 @@
           <q-card-section class="row items-center">
             <div class="text-h6">{{ roleAssignTarget.label }}</div>
             <q-space />
-            <q-btn icon="close" flat round dense v-close-popup />
+            <q-btn icon="mdi-close" flat round dense v-close-popup />
           </q-card-section>
           <q-card-section>
             <q-select
@@ -452,7 +452,9 @@ import formatMixin from '@mixins/formatMixin';
 import SavedNotification from '@components/SavedNotification.vue';
 
 export default {
-  setup() {useCtrlF('.search-input input');},
+  setup() {
+    useCtrlF('.search-input input');
+  },
   emits: ['ok', 'cancel', 'hide'],
   components: {
     SavedNotification,

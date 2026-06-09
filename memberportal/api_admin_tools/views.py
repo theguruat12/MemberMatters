@@ -1,3 +1,4 @@
+import csv
 import json
 
 import stripe
@@ -8,6 +9,7 @@ from constance.backends.database.models import Constance as ConstanceSetting
 from django.db.models import F, Sum, Value, CharField, Count, Max
 from django.db.models.functions import Concat
 from django.db.utils import OperationalError
+from django.http import HttpResponse
 from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
@@ -438,6 +440,49 @@ class Interlocks(APIView):
         interlock.delete()
 
         return Response()
+
+
+class InterlockAccessCSV(APIView):
+    """
+    get: Returns a CSV of all interlock access grants (interlock, member, role, granted by, date).
+    """
+
+    permission_classes = (permissions.IsAdminUser,)
+
+    def get(self, request):
+        grants = InterlockAccessGrant.objects.select_related(
+            "interlock",
+            "profile__user",
+            "granted_by__profile",
+        ).order_by("interlock__name", "role", "profile__first_name")
+
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="interlock_access.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(
+            [
+                "Interlock",
+                "Member Name",
+                "Member Email",
+                "Role",
+                "Granted By",
+                "Granted Date",
+            ]
+        )
+        for g in grants:
+            writer.writerow(
+                [
+                    g.interlock.name,
+                    g.profile.get_full_name(),
+                    g.profile.user.email,
+                    g.role,
+                    g.granted_by.profile.get_full_name() if g.granted_by else "",
+                    g.granted_date.strftime("%Y-%m-%d %H:%M") if g.granted_date else "",
+                ]
+            )
+
+        return response
 
 
 class MemberbucksDevices(APIView):

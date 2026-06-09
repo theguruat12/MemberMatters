@@ -663,6 +663,7 @@ export default {
     create: 'Add Interlock',
     createSuccess: 'Interlock created successfully.',
     createFail: 'Failed to create interlock.',
+    exportCsv: 'Export CSV',
   },
   'memberbucks-devices': {
     nodata: 'There are no spacebucks devices in the system.',

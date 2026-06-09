@@ -37,7 +37,7 @@
                 dense
                 color="positive"
                 :label="$t('access.grantAccess')"
-                icon="add"
+                icon="mdi-plus"
                 @click="openAssign(interlock)"
               />
             </div>
@@ -49,7 +49,7 @@
               </q-item>
               <q-item v-for="u in interlock.users" :key="u.userId">
                 <q-item-section avatar>
-                  <q-icon name="person" color="positive" />
+                  <q-icon name="mdi-account" color="positive" />
                 </q-item-section>
                 <q-item-section>
                   <q-item-label>{{ u.name }}</q-item-label>
@@ -63,7 +63,7 @@
                     flat
                     dense
                     round
-                    icon="person_remove"
+                    icon="mdi-account-remove"
                     color="negative"
                     @click="revokeAccess(interlock, u.userId)"
                   >
@@ -83,7 +83,7 @@
         <q-card-section class="row items-center">
           <div class="text-h6">{{ $t('access.grantAccess') }}</div>
           <q-space />
-          <q-btn icon="close" flat round dense v-close-popup />
+          <q-btn icon="mdi-close" flat round dense v-close-popup />
         </q-card-section>
 
         <q-card-section>

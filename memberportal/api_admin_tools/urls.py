@@ -57,6 +57,11 @@ urlpatterns = [
     ),
     path("api/admin/doors/", views.Doors.as_view(), name="Doors"),
     path("api/admin/interlocks/", views.Interlocks.as_view(), name="Interlocks"),
+    path(
+        "api/admin/interlocks/export-csv/",
+        views.InterlockAccessCSV.as_view(),
+        name="InterlockAccessCSV",
+    ),
     path("api/admin/doors/<int:door_id>/", views.Doors.as_view(), name="Doors"),
     path(
         "api/admin/interlocks/<int:interlock_id>/",

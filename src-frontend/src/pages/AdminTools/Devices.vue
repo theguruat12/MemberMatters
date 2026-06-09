@@ -25,7 +25,14 @@
           ></devices-list>
         </q-tab-panel>
         <q-tab-panel name="interlocks" style="width: 100%">
-          <div class="row justify-end q-mb-md">
+          <div class="row justify-end q-gutter-sm q-mb-md">
+            <q-btn
+              flat
+              color="primary"
+              :icon="icons.download"
+              :label="$t('interlocks.exportCsv')"
+              @click="downloadAccessCsv"
+            />
             <q-btn
               color="primary"
               :icon="icons.add"
@@ -152,6 +159,12 @@ export default {
         .onOk(() => undefined)
         .onCancel(() => undefined)
         .onDismiss(() => undefined);
+    },
+    downloadAccessCsv() {
+      const link = document.createElement('a');
+      link.href = '/api/admin/interlocks/export-csv/';
+      link.download = 'interlock_access.csv';
+      link.click();
     },
     openCreateInterlock() {
       this.createForm = { name: '', description: '', ipAddress: '' };
