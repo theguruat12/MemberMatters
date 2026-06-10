@@ -120,6 +120,7 @@
         v-model="form.emergencyContactName"
         outlined
         :debounce="debounceLength"
+        :maxlength="100"
         :label="$t('form.emergencyContactName')"
         :rules="[
           (val) => validateNotEmpty(val) || $t('validation.cannotBeEmpty'),
@@ -140,6 +141,7 @@
         outlined
         :debounce="debounceLength"
         type="tel"
+        :maxlength="20"
         :label="$t('form.emergencyContactPhone')"
         :rules="[
           (val) => validateNotEmpty(val) || $t('validation.cannotBeEmpty'),
@@ -160,6 +162,7 @@
         v-model="form.emergencyContactRelationship"
         outlined
         :debounce="debounceLength"
+        :maxlength="50"
         :label="$t('form.emergencyContactRelationship')"
         @update:model-value="saveChange('emergencyContactRelationship')"
       >

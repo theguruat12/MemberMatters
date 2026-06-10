@@ -271,6 +271,7 @@
                   v-model="profileForm.emergencyContactName"
                   outlined
                   :debounce="debounceLength"
+                  :maxlength="100"
                   :label="$t('form.emergencyContactName')"
                   :rules="[
                     (val) =>
@@ -290,6 +291,7 @@
                   v-model="profileForm.emergencyContactPhone"
                   outlined
                   :debounce="debounceLength"
+                  :maxlength="20"
                   :label="$t('form.emergencyContactPhone')"
                   :rules="[
                     (val) =>
@@ -311,6 +313,7 @@
                   v-model="profileForm.emergencyContactRelationship"
                   outlined
                   :debounce="debounceLength"
+                  :maxlength="50"
                   :label="$t('form.emergencyContactRelationship')"
                   @update:model-value="
                     saveChange('emergencyContactRelationship')
