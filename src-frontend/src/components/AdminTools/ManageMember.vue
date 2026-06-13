@@ -244,7 +244,11 @@
                   v-model="profileForm.discordHandle"
                   outlined
                   :debounce="debounceLength"
-                  :label="$t('form.discordHandle')"
+                  :label="
+                    $t('form.discordHandle', {
+                      platform: instantMessagingPlatform,
+                    })
+                  "
                   @update:model-value="saveChange('discordHandle')"
                 >
                   <template #append>
@@ -451,7 +455,11 @@
                     </q-item-label>
 
                     <q-item-label caption>
-                      {{ $t(`form.${item}`) }}
+                      {{
+                        $t(`form.${item}`, {
+                          platform: instantMessagingPlatform,
+                        })
+                      }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -1509,7 +1517,9 @@ import { MemberBillingInfo, MemberProfile, MemberState } from 'types/member';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
-  setup() {useCtrlF('.search-input input');},
+  setup() {
+    useCtrlF('.search-input input');
+  },
   name: 'ManageMember',
   components: { AccessList, SavedNotification },
   mixins: [formMixin, formatMixin],
@@ -1819,7 +1829,11 @@ export default defineComponent({
     },
   },
   computed: {
-    ...mapGetters('config', ['siteLocaleCurrency', 'features']),
+    ...mapGetters('config', [
+      'siteLocaleCurrency',
+      'features',
+      'instantMessagingPlatform',
+    ]),
     selectedMember() {
       if (this.members) {
         return (this.members as MemberProfile[]).find(

@@ -74,6 +74,10 @@ CONSTANCE_CONFIG = {
         "Memberbucks",
         "You can customise the name of the built in currency.",
     ),
+    "INSTANT_MESSAGING_PLATFORM": (
+        "Discord",
+        "The name of the instant messaging platform used for member handles (e.g. Discord, Slack, Teams).",
+    ),
     "WEBCAM_PAGE_URLS": (
         """[["Example", "https://brisbanemaker.space/wp-content/uploads/2021/10/BMS-Logo-ONLY.png"]]""",
         "A JSON serialised array of URLs to pull webcam images from.",
@@ -580,6 +584,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
             "Group Localisation",
             (
                 "MEMBERBUCKS_NAME",
+                "INSTANT_MESSAGING_PLATFORM",
                 "WEBCAM_PAGE_URLS",
                 "HOME_PAGE_CARDS",
                 "WELCOME_EMAIL_CARDS",

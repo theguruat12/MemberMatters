@@ -98,7 +98,9 @@
         v-model="form.discordHandle"
         outlined
         :debounce="debounceLength"
-        :label="$t('form.discordHandle')"
+        :label="
+          $t('form.discordHandle', { platform: instantMessagingPlatform })
+        "
         :rules="[(val) => validateMax30(val) || $t('validation.max30')]"
         @update:model-value="saveChange('discordHandle')"
       >
@@ -292,7 +294,7 @@ export default {
   },
   computed: {
     ...mapGetters('profile', ['profile']),
-    ...mapGetters('config', ['features']),
+    ...mapGetters('config', ['features', 'instantMessagingPlatform']),
     icons() {
       return icons;
     },

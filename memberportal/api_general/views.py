@@ -96,6 +96,7 @@ class GetConfig(APIView):
                 "siteName": config.SITE_NAME,
                 "siteOwner": config.SITE_OWNER,
                 "siteLocaleCurrency": config.SITE_LOCALE_CURRENCY,
+                "instantMessagingPlatform": config.INSTANT_MESSAGING_PLATFORM,
             },
             "contact": {
                 "admin": config.EMAIL_ADMIN,

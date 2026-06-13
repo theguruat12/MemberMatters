@@ -13,6 +13,7 @@ export default {
     siteName: 'MemberMatters Portal',
     siteOwner: 'MemberMatters',
     siteLocaleCurrency: 'en-AU',
+    instantMessagingPlatform: 'Discord',
     contact: {},
     homepageCards: {},
     webcamLinks: {},
@@ -27,6 +28,7 @@ export default {
     siteName: (state) => state.siteName,
     siteOwner: (state) => state.siteOwner,
     siteLocaleCurrency: (state) => state.siteLocaleCurrency,
+    instantMessagingPlatform: (state) => state.instantMessagingPlatform,
     contact: (state) => state.contact,
     homepageCards: (state) => state.homepageCards,
     webcamLinks: (state) => state.webcamLinks,
@@ -46,6 +48,9 @@ export default {
     },
     setSiteLocaleCurrency(state, payload) {
       state.siteLocaleCurrency = payload;
+    },
+    setInstantMessagingPlatform(state, payload) {
+      state.instantMessagingPlatform = payload;
     },
     setContact(state, payload) {
       state.contact = payload;
@@ -86,6 +91,10 @@ export default {
             commit(
               'setSiteLocaleCurrency',
               result.data.general.siteLocaleCurrency
+            );
+            commit(
+              'setInstantMessagingPlatform',
+              result.data.general.instantMessagingPlatform
             );
             commit('setContact', result.data.contact);
             commit('setHomepageCards', result.data.homepageCards);
