@@ -115,6 +115,7 @@
               dense
               debounce="300"
               placeholder="Search"
+              class="search-input"
             >
               <template v-slot:append>
                 <q-icon :name="icons.search" />
@@ -266,6 +267,7 @@
 </template>
 
 <script lang="ts">
+import { useCtrlF } from 'src/composables/search';
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { AxiosResponse } from 'axios';
@@ -275,6 +277,7 @@ import formatMixin from '../../mixins/formatMixin';
 import formMixin from '../../mixins/formMixin';
 
 export default defineComponent({
+  setup() {useCtrlF('.search-input input');},
   name: 'ManageTier',
   mixins: [formatMixin, formMixin],
   setup() {

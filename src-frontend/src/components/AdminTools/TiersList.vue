@@ -108,6 +108,7 @@
           dense
           debounce="300"
           placeholder="Search"
+          class="search-input"
         >
           <template v-slot:append>
             <q-icon :name="icons.search" />
@@ -129,6 +130,7 @@
 </template>
 
 <script lang="ts">
+import { useCtrlF } from 'src/composables/search';
 import { defineComponent, computed } from 'vue';
 import { useStore } from 'vuex';
 import icons from '../../icons';
@@ -145,7 +147,7 @@ export default defineComponent({
     const tiers = computed(() => store.getters['adminTools/tiers']);
 
     getTiers();
-
+    useCtrlF('.search-input input');
     return {
       getTiers,
       tiers,

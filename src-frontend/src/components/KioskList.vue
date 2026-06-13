@@ -33,6 +33,7 @@
         dense
         debounce="300"
         placeholder="Search"
+        class="search-input"
       >
         <template v-slot:append>
           <q-icon :name="icons.search" />
@@ -145,6 +146,7 @@
 </template>
 
 <script>
+import { useCtrlF } from 'src/composables/search';
 import { mapActions, mapGetters } from 'vuex';
 import KioskForm from '@components/KioskForm.vue';
 import KioskDetails from '@components/KioskDetails.vue';
@@ -152,6 +154,7 @@ import icons from '../icons';
 import formatMixin from '../mixins/formatMixin';
 
 export default {
+  setup() {useCtrlF('.search-input input');},
   name: 'KioskList',
   components: { KioskForm, KioskDetails },
   mixins: [formatMixin],

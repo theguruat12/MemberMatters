@@ -18,6 +18,7 @@
           dense
           debounce="300"
           placeholder="Search"
+          class="search-input"
         >
           <template v-slot:append>
             <q-icon :name="icons.search" />
@@ -31,12 +32,14 @@
 </template>
 
 <script>
+import { useCtrlF } from 'src/composables/search';
 import { mapActions, mapGetters } from 'vuex';
 import icons from '../icons';
 import RefreshDataDialog from '@components/RefreshDataDialog.vue';
 import formatMixin from 'src/mixins/formatMixin';
 
 export default {
+  setup() {useCtrlF('.search-input input');},
   name: 'LastSeenList',
   components: { RefreshDataDialog },
   mixins: [formatMixin],

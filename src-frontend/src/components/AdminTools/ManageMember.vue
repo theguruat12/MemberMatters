@@ -762,6 +762,7 @@
                       debounce="300"
                       placeholder="Search"
                       style="margin-top: -3px"
+                      class="search-input"
                     >
                       <template v-slot:append>
                         <q-icon :name="icons.search" />
@@ -788,6 +789,7 @@
                     debounce="300"
                     placeholder="Search"
                     style="margin-top: -3px"
+                    class="search-input"
                   >
                     <template v-slot:append>
                       <q-icon :name="icons.search" />
@@ -855,6 +857,7 @@
                   debounce="300"
                   placeholder="Search"
                   style="margin-top: -3px"
+                  class="search-input"
                 >
                   <template v-slot:append>
                     <q-icon :name="icons.search" />
@@ -871,6 +874,7 @@
                 debounce="300"
                 placeholder="Search"
                 style="margin-top: -3px"
+                class="search-input"
               >
                 <template v-slot:append>
                   <q-icon :name="icons.search" />
@@ -977,6 +981,7 @@
                   debounce="300"
                   placeholder="Search"
                   style="margin-top: -3px"
+                  class="search-input"
                 >
                   <template v-slot:append>
                     <q-icon :name="icons.search" />
@@ -993,6 +998,7 @@
                 debounce="300"
                 placeholder="Search"
                 style="margin-top: -3px"
+                class="search-input"
               >
                 <template v-slot:append>
                   <q-icon :name="icons.search" />
@@ -1139,6 +1145,7 @@
                   debounce="300"
                   placeholder="Search"
                   style="margin-top: -3px"
+                  class="search-input"
                 >
                   <template v-slot:append>
                     <q-icon :name="icons.search" />
@@ -1155,6 +1162,7 @@
                 debounce="300"
                 placeholder="Search"
                 style="margin-top: -3px"
+                class="search-input"
               >
                 <template v-slot:append>
                   <q-icon :name="icons.search" />
@@ -1363,6 +1371,7 @@
 </template>
 
 <script lang="ts">
+import { useCtrlF } from 'src/composables/search';
 import AccessList from '@components/AccessList.vue';
 import formMixin from '@mixins/formMixin';
 import SavedNotification from '@components/SavedNotification.vue';
@@ -1374,6 +1383,7 @@ import { MemberBillingInfo, MemberProfile, MemberState } from 'types/member';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
+  setup() {useCtrlF('.search-input input');},
   name: 'ManageMember',
   components: { AccessList, SavedNotification },
   mixins: [formMixin, formatMixin],

@@ -101,6 +101,7 @@
           dense
           debounce="300"
           placeholder="Search"
+          class="search-input"
         >
           <template v-slot:append>
             <q-icon :name="icons.search" />
@@ -112,6 +113,7 @@
 </template>
 
 <script lang="ts">
+import { useCtrlF } from 'src/composables/search';
 import { copyToClipboard } from 'quasar';
 import icons from '@icons';
 import formatMixin from '@mixins/formatMixin';
@@ -122,6 +124,7 @@ import { MemberProfile } from 'types/member';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
+  setup() {useCtrlF('.search-input input');},
   name: 'MembersList',
   mixins: [formatMixin],
   data() {

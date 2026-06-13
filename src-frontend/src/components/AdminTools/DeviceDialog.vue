@@ -249,6 +249,7 @@
                   dense
                   debounce="300"
                   placeholder="Search"
+                  class="search-input"
                 >
                   <template v-slot:append>
                     <q-icon :name="icons.search" />
@@ -283,6 +284,7 @@
 </template>
 
 <script>
+import { useCtrlF } from 'src/composables/search';
 import icons from '@icons';
 import { mapGetters, mapActions } from 'vuex';
 import formMixin from '@mixins/formMixin';
@@ -290,6 +292,7 @@ import formatMixin from '@mixins/formatMixin';
 import SavedNotification from '@components/SavedNotification.vue';
 
 export default {
+  setup() {useCtrlF('.search-input input');},
   emits: ['ok', 'cancel', 'hide'],
   components: {
     SavedNotification,
