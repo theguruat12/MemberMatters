@@ -171,7 +171,7 @@ export default {
       loading: false,
       filter: '',
       pagination: {
-        sortBy: 'lastSeen',
+        sortBy: 'id',
         descending: false,
         rowsPerPage: this.$q.screen.xs ? 3 : 10,
       },
