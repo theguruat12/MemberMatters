@@ -111,6 +111,69 @@
           />
         </template>
       </q-input>
+
+      <div class="text-subtitle1 q-mt-md q-mb-xs">
+        {{ $t('form.emergencyContact') }}
+      </div>
+
+      <q-input
+        v-model="form.emergencyContactName"
+        outlined
+        :debounce="debounceLength"
+        :maxlength="100"
+        :label="$t('form.emergencyContactName')"
+        :rules="[
+          (val) => validateNotEmpty(val) || $t('validation.cannotBeEmpty'),
+        ]"
+        @update:model-value="saveChange('emergencyContactName')"
+      >
+        <template v-slot:append>
+          <saved-notification
+            :success="saved.emergencyContactName"
+            show-text
+            :error="saved.error"
+          />
+        </template>
+      </q-input>
+
+      <q-input
+        v-model="form.emergencyContactPhone"
+        outlined
+        :debounce="debounceLength"
+        type="tel"
+        :maxlength="20"
+        :label="$t('form.emergencyContactPhone')"
+        :rules="[
+          (val) => validateNotEmpty(val) || $t('validation.cannotBeEmpty'),
+          (val) => validatePhone(val) || $t('validation.invalidPhone'),
+        ]"
+        @update:model-value="saveChange('emergencyContactPhone')"
+      >
+        <template v-slot:append>
+          <saved-notification
+            :success="saved.emergencyContactPhone"
+            show-text
+            :error="saved.error"
+          />
+        </template>
+      </q-input>
+
+      <q-input
+        v-model="form.emergencyContactRelationship"
+        outlined
+        :debounce="debounceLength"
+        :maxlength="50"
+        :label="$t('form.emergencyContactRelationship')"
+        @update:model-value="saveChange('emergencyContactRelationship')"
+      >
+        <template v-slot:append>
+          <saved-notification
+            :success="saved.emergencyContactRelationship"
+            show-text
+            :error="saved.error"
+          />
+        </template>
+      </q-input>
     </q-form>
   </div>
 </template>
@@ -136,6 +199,9 @@ export default {
         phone: '',
         screenName: '',
         vehicleRegistrationPlate: '',
+        emergencyContactName: '',
+        emergencyContactPhone: '',
+        emergencyContactRelationship: '',
       },
       saved: {
         // if there was an error saving the form
@@ -147,6 +213,9 @@ export default {
         phone: false,
         screenName: false,
         vehicleRegistrationPlate: false,
+        emergencyContactName: false,
+        emergencyContactPhone: false,
+        emergencyContactRelationship: false,
       },
     };
   },
@@ -160,6 +229,11 @@ export default {
       this.form.screenName = this.profile.screenName;
       this.form.vehicleRegistrationPlate =
         this.profile.vehicleRegistrationPlate;
+      this.form.emergencyContactName = this.profile.emergencyContactName || '';
+      this.form.emergencyContactPhone =
+        this.profile.emergencyContactPhone || '';
+      this.form.emergencyContactRelationship =
+        this.profile.emergencyContactRelationship || '';
     },
     saveChange(field) {
       this.$refs.formRef.validate(false).then(() => {

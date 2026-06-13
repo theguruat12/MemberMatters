@@ -92,6 +92,43 @@
               :rules="[(val) => validateMax30(val) || $t('validation.max30')]"
             ></q-input>
 
+            <div class="col-12 q-mt-sm">
+              <p class="text-subtitle2 q-mb-xs">
+                {{ $t('form.emergencyContact') }}
+              </p>
+            </div>
+
+            <q-input
+              v-model="form.emergencyContactName"
+              class="col-12 col-sm-6"
+              filled
+              :label="$t('form.emergencyContactName')"
+              lazy-rules
+              :rules="[
+                (val) =>
+                  validateNotEmpty(val) || $t('validation.cannotBeEmpty'),
+              ]"
+            />
+            <q-input
+              v-model="form.emergencyContactPhone"
+              class="col-12 col-sm-6"
+              filled
+              type="tel"
+              :label="$t('form.emergencyContactPhone')"
+              lazy-rules
+              :rules="[
+                (val) =>
+                  validateNotEmpty(val) || $t('validation.cannotBeEmpty'),
+                (val) => validatePhone(val) || $t('validation.invalidPhone'),
+              ]"
+            />
+            <q-input
+              v-model="form.emergencyContactRelationship"
+              class="col-12 q-mb-sm"
+              filled
+              :label="$t('form.emergencyContactRelationship')"
+            />
+
             <q-input
               class="col-12"
               v-model="form.password"
@@ -173,6 +210,9 @@ export default defineComponent({
         mobile: null,
         password: null,
         vehicleRegistrationPlate: null,
+        emergencyContactName: null,
+        emergencyContactPhone: null,
+        emergencyContactRelationship: null,
       },
     };
   },
@@ -211,6 +251,9 @@ export default defineComponent({
           mobile: this.form.mobile,
           password: this.form.password,
           vehicleRegistrationPlate: this.form.vehicleRegistrationPlate,
+          emergencyContactName: this.form.emergencyContactName,
+          emergencyContactPhone: this.form.emergencyContactPhone,
+          emergencyContactRelationship: this.form.emergencyContactRelationship,
         })
         .then(() => {
           this.failed = false;

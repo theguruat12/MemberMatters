@@ -367,6 +367,12 @@ class Profile(ExportModelOperationsMixin("profile"), models.Model):
     last_seen = models.DateTimeField(default=None, blank=True, null=True)
     last_induction = models.DateTimeField(default=None, blank=True, null=True)
 
+    emergency_contact_name = models.CharField(max_length=100, blank=True, null=True)
+    emergency_contact_phone = models.CharField(max_length=20, blank=True, null=True)
+    emergency_contact_relationship = models.CharField(
+        max_length=50, blank=True, null=True
+    )
+
     stripe_customer_id = models.CharField(
         max_length=100, blank=True, null=True, default=""
     )
@@ -555,6 +561,9 @@ class Profile(ExportModelOperationsMixin("profile"), models.Model):
                 "last4": self.stripe_card_last_digits,
             },
             "subscriptionStatus": self.subscription_status,
+            "emergencyContactName": self.emergency_contact_name,
+            "emergencyContactPhone": self.emergency_contact_phone,
+            "emergencyContactRelationship": self.emergency_contact_relationship,
         }
 
     def get_access_permissions(self, ignore_user_state=False):

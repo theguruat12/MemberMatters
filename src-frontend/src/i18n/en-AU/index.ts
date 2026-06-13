@@ -272,6 +272,10 @@ export default {
     intervalCount: 'Interval Count',
     interval: 'Interval Period',
     vehicleRegistrationPlate: 'Vehicle Registration Plate Number',
+    emergencyContact: 'Emergency Contact',
+    emergencyContactName: 'Emergency Contact Name',
+    emergencyContactPhone: 'Emergency Contact Phone',
+    emergencyContactRelationship: 'Relationship to Member',
     vehicleRegistrationNote:
       'Please enter your vehicle registration plate if you have any. Separate multiple with a space. We use this to help manage parking.',
     excludeFromEmailExport: 'Excluded from email exports',

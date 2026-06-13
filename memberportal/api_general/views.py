@@ -382,6 +382,9 @@ class ProfileDetail(generics.GenericAPIView):
             "phone": p.phone,
             "memberStatus": p.state,
             "vehicleRegistrationPlate": p.vehicle_registration_plate,
+            "emergencyContactName": p.emergency_contact_name,
+            "emergencyContactPhone": p.emergency_contact_phone,
+            "emergencyContactRelationship": p.emergency_contact_relationship,
             "lastInduction": p.last_induction,
             "lastSeen": p.last_seen,
             "firstJoined": p.created,
@@ -443,6 +446,11 @@ class ProfileDetail(generics.GenericAPIView):
         p.phone = body.get("phone")
         p.screen_name = body.get("screenName")
         p.vehicle_registration_plate = body.get("vehicleRegistrationPlate")
+        p.emergency_contact_name = body.get("emergencyContactName") or None
+        p.emergency_contact_phone = body.get("emergencyContactPhone") or None
+        p.emergency_contact_relationship = (
+            body.get("emergencyContactRelationship") or None
+        )
 
         request.user.save()
         p.save()
@@ -666,6 +674,9 @@ class Register(APIView):
             screen_name=body.get("screenName"),
             phone=body.get("mobile"),
             vehicle_registration_plate=body.get("vehicleRegistrationPlate"),
+            emergency_contact_name=body.get("emergencyContactName"),
+            emergency_contact_phone=body.get("emergencyContactPhone"),
+            emergency_contact_relationship=body.get("emergencyContactRelationship"),
         )
 
         profile.save()

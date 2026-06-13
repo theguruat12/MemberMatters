@@ -262,6 +262,70 @@
                     />
                   </template>
                 </q-input>
+
+                <h5 class="q-my-sm">
+                  {{ $t('form.emergencyContact') }}
+                </h5>
+
+                <q-input
+                  v-model="profileForm.emergencyContactName"
+                  outlined
+                  :debounce="debounceLength"
+                  :maxlength="100"
+                  :label="$t('form.emergencyContactName')"
+                  :rules="[
+                    (val) =>
+                      validateNotEmpty(val) || $t('validation.cannotBeEmpty'),
+                  ]"
+                  @update:model-value="saveChange('emergencyContactName')"
+                >
+                  <template #append>
+                    <saved-notification
+                      :success="saved.emergencyContactName"
+                      :error="saved.error"
+                    />
+                  </template>
+                </q-input>
+
+                <q-input
+                  v-model="profileForm.emergencyContactPhone"
+                  outlined
+                  :debounce="debounceLength"
+                  :maxlength="20"
+                  :label="$t('form.emergencyContactPhone')"
+                  :rules="[
+                    (val) =>
+                      validateNotEmpty(val) || $t('validation.cannotBeEmpty'),
+                    (val) =>
+                      validatePhone(val) || $t('validation.invalidPhone'),
+                  ]"
+                  @update:model-value="saveChange('emergencyContactPhone')"
+                >
+                  <template #append>
+                    <saved-notification
+                      :success="saved.emergencyContactPhone"
+                      :error="saved.error"
+                    />
+                  </template>
+                </q-input>
+
+                <q-input
+                  v-model="profileForm.emergencyContactRelationship"
+                  outlined
+                  :debounce="debounceLength"
+                  :maxlength="50"
+                  :label="$t('form.emergencyContactRelationship')"
+                  @update:model-value="
+                    saveChange('emergencyContactRelationship')
+                  "
+                >
+                  <template #append>
+                    <saved-notification
+                      :success="saved.emergencyContactRelationship"
+                      :error="saved.error"
+                    />
+                  </template>
+                </q-input>
               </q-form>
             </div>
 
@@ -269,6 +333,52 @@
               class="col-12 col-md-6"
               :class="{ 'q-px-sm': $q.screen.xs, 'q-px-lg': !$q.screen.xs }"
             >
+              <h5 class="q-my-sm text-negative">
+                {{ $t('form.emergencyContact') }}
+              </h5>
+
+              <q-list bordered padding class="rounded-borders bg-red-1 q-mb-md">
+                <q-item>
+                  <q-item-section>
+                    <q-item-label>
+                      {{
+                        selectedMember.emergencyContactName ||
+                        $t('error.noValue')
+                      }}
+                    </q-item-label>
+                    <q-item-label caption>
+                      {{ $t('form.emergencyContactName') }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item>
+                  <q-item-section>
+                    <q-item-label>
+                      {{
+                        selectedMember.emergencyContactPhone ||
+                        $t('error.noValue')
+                      }}
+                    </q-item-label>
+                    <q-item-label caption>
+                      {{ $t('form.emergencyContactPhone') }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item>
+                  <q-item-section>
+                    <q-item-label>
+                      {{
+                        selectedMember.emergencyContactRelationship ||
+                        $t('error.noValue')
+                      }}
+                    </q-item-label>
+                    <q-item-label caption>
+                      {{ $t('form.emergencyContactRelationship') }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+
               <h5 class="q-my-sm">
                 {{ $t('adminTools.otherAttributes') }}
               </h5>
@@ -1417,6 +1527,9 @@ export default defineComponent({
         phone: '',
         screenName: '',
         vehicleRegistrationPlate: '',
+        emergencyContactName: '',
+        emergencyContactPhone: '',
+        emergencyContactRelationship: '',
       },
       saved: {
         // if there was an error saving the form
@@ -1429,6 +1542,9 @@ export default defineComponent({
         phone: false,
         screenName: false,
         vehicleRegistrationPlate: false,
+        emergencyContactName: false,
+        emergencyContactPhone: false,
+        emergencyContactRelationship: false,
       },
       billing: null as MemberBillingInfo | null,
       logs: {
@@ -1466,6 +1582,12 @@ export default defineComponent({
       this.profileForm.screenName = this.selectedMember.screenName;
       this.profileForm.vehicleRegistrationPlate =
         this.selectedMember.vehicleRegistrationPlate;
+      this.profileForm.emergencyContactName =
+        this.selectedMember.emergencyContactName || '';
+      this.profileForm.emergencyContactPhone =
+        this.selectedMember.emergencyContactPhone || '';
+      this.profileForm.emergencyContactRelationship =
+        this.selectedMember.emergencyContactRelationship || '';
     },
     async checkRfidUniqueness(val: string) {
       if (!val) return true;
