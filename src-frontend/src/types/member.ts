@@ -44,6 +44,7 @@ export const MemberProfileSchema = z.object({
     last4: z.string(),
   }),
   subscriptionStatus: SubscriptionStateSchema,
+  discordHandle: z.string().nullable(),
 });
 
 export type MemberProfile = z.infer<typeof MemberProfileSchema>;

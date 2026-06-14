@@ -241,6 +241,25 @@
                 </q-input>
 
                 <q-input
+                  v-model="profileForm.discordHandle"
+                  outlined
+                  :debounce="debounceLength"
+                  :label="
+                    $t('form.discordHandle', {
+                      platform: instantMessagingPlatform,
+                    })
+                  "
+                  @update:model-value="saveChange('discordHandle')"
+                >
+                  <template #append>
+                    <saved-notification
+                      :success="saved.discordHandle"
+                      :error="saved.error"
+                    />
+                  </template>
+                </q-input>
+
+                <q-input
                   v-if="
                     features?.signup?.collectVehicleRegistrationPlate ||
                     profileForm.vehicleRegistrationPlate
@@ -424,7 +443,7 @@
                   </q-item-section>
                 </q-item>
 
-                <q-item v-for="item in ['id']" :key="item">
+                <q-item v-for="item in ['id', 'discordHandle']" :key="item">
                   <q-item-section>
                     <q-item-label
                       >{{
@@ -436,7 +455,11 @@
                     </q-item-label>
 
                     <q-item-label caption>
-                      {{ $t(`form.${item}`) }}
+                      {{
+                        $t(`form.${item}`, {
+                          platform: instantMessagingPlatform,
+                        })
+                      }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -1494,7 +1517,9 @@ import { MemberBillingInfo, MemberProfile, MemberState } from 'types/member';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
-  setup() {useCtrlF('.search-input input');},
+  setup() {
+    useCtrlF('.search-input input');
+  },
   name: 'ManageMember',
   components: { AccessList, SavedNotification },
   mixins: [formMixin, formatMixin],
@@ -1530,6 +1555,7 @@ export default defineComponent({
         emergencyContactName: '',
         emergencyContactPhone: '',
         emergencyContactRelationship: '',
+        discordHandle: '',
       },
       saved: {
         // if there was an error saving the form
@@ -1545,6 +1571,7 @@ export default defineComponent({
         emergencyContactName: false,
         emergencyContactPhone: false,
         emergencyContactRelationship: false,
+        discordHandle: false,
       },
       billing: null as MemberBillingInfo | null,
       logs: {
@@ -1588,6 +1615,7 @@ export default defineComponent({
         this.selectedMember.emergencyContactPhone || '';
       this.profileForm.emergencyContactRelationship =
         this.selectedMember.emergencyContactRelationship || '';
+      this.profileForm.discordHandle = this.selectedMember.discordHandle || '';
     },
     async checkRfidUniqueness(val: string) {
       if (!val) return true;
@@ -1801,7 +1829,11 @@ export default defineComponent({
     },
   },
   computed: {
-    ...mapGetters('config', ['siteLocaleCurrency', 'features']),
+    ...mapGetters('config', [
+      'siteLocaleCurrency',
+      'features',
+      'instantMessagingPlatform',
+    ]),
     selectedMember() {
       if (this.members) {
         return (this.members as MemberProfile[]).find(

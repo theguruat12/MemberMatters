@@ -366,6 +366,7 @@ class Profile(ExportModelOperationsMixin("profile"), models.Model):
 
     last_seen = models.DateTimeField(default=None, blank=True, null=True)
     last_induction = models.DateTimeField(default=None, blank=True, null=True)
+    discord_handle = models.CharField(max_length=100, blank=True, null=True)
 
     emergency_contact_name = models.CharField(max_length=100, blank=True, null=True)
     emergency_contact_phone = models.CharField(max_length=20, blank=True, null=True)
@@ -564,6 +565,7 @@ class Profile(ExportModelOperationsMixin("profile"), models.Model):
             "emergencyContactName": self.emergency_contact_name,
             "emergencyContactPhone": self.emergency_contact_phone,
             "emergencyContactRelationship": self.emergency_contact_relationship,
+            "discordHandle": self.discord_handle,
         }
 
     def get_access_permissions(self, ignore_user_state=False):

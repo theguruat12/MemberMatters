@@ -276,6 +276,7 @@ export default {
     emergencyContactName: 'Emergency Contact Name',
     emergencyContactPhone: 'Emergency Contact Phone',
     emergencyContactRelationship: 'Relationship to Member',
+    discordHandle: '{platform} Handle',
     vehicleRegistrationNote:
       'Please enter your vehicle registration plate if you have any. Separate multiple with a space. We use this to help manage parking.',
     excludeFromEmailExport: 'Excluded from email exports',

@@ -96,6 +96,7 @@ class GetConfig(APIView):
                 "siteName": config.SITE_NAME,
                 "siteOwner": config.SITE_OWNER,
                 "siteLocaleCurrency": config.SITE_LOCALE_CURRENCY,
+                "instantMessagingPlatform": config.INSTANT_MESSAGING_PLATFORM,
             },
             "contact": {
                 "admin": config.EMAIL_ADMIN,
@@ -385,6 +386,7 @@ class ProfileDetail(generics.GenericAPIView):
             "emergencyContactName": p.emergency_contact_name,
             "emergencyContactPhone": p.emergency_contact_phone,
             "emergencyContactRelationship": p.emergency_contact_relationship,
+            "discordHandle": p.discord_handle,
             "lastInduction": p.last_induction,
             "lastSeen": p.last_seen,
             "firstJoined": p.created,
@@ -451,6 +453,7 @@ class ProfileDetail(generics.GenericAPIView):
         p.emergency_contact_relationship = (
             body.get("emergencyContactRelationship") or None
         )
+        p.discord_handle = body.get("discordHandle") or None
 
         request.user.save()
         p.save()

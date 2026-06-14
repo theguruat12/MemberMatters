@@ -95,6 +95,25 @@
       </q-input>
 
       <q-input
+        v-model="form.discordHandle"
+        outlined
+        :debounce="debounceLength"
+        :label="
+          $t('form.discordHandle', { platform: instantMessagingPlatform })
+        "
+        :rules="[(val) => validateMax30(val) || $t('validation.max30')]"
+        @update:model-value="saveChange('discordHandle')"
+      >
+        <template v-slot:append>
+          <saved-notification
+            :success="saved.discordHandle"
+            show-text
+            :error="saved.error"
+          />
+        </template>
+      </q-input>
+
+      <q-input
         v-if="features?.signup?.collectVehicleRegistrationPlate"
         v-model="form.vehicleRegistrationPlate"
         outlined
@@ -202,6 +221,7 @@ export default {
         emergencyContactName: '',
         emergencyContactPhone: '',
         emergencyContactRelationship: '',
+        discordHandle: '',
       },
       saved: {
         // if there was an error saving the form
@@ -216,6 +236,7 @@ export default {
         emergencyContactName: false,
         emergencyContactPhone: false,
         emergencyContactRelationship: false,
+        discordHandle: false,
       },
     };
   },
@@ -234,6 +255,7 @@ export default {
         this.profile.emergencyContactPhone || '';
       this.form.emergencyContactRelationship =
         this.profile.emergencyContactRelationship || '';
+      this.form.discordHandle = this.profile.discordHandle || '';
     },
     saveChange(field) {
       this.$refs.formRef.validate(false).then(() => {
@@ -272,7 +294,7 @@ export default {
   },
   computed: {
     ...mapGetters('profile', ['profile']),
-    ...mapGetters('config', ['features']),
+    ...mapGetters('config', ['features', 'instantMessagingPlatform']),
     icons() {
       return icons;
     },
