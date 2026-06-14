@@ -1723,13 +1723,21 @@ export default defineComponent({
         .dialog({
           title: this.$t('confirmAction'),
           message: this.$t('adminTools.cancelMembershipConfirm'),
+          prompt: {
+            model: '',
+            type: 'text',
+            label: this.$t('adminTools.cancelMembershipReason'),
+            isValid: (val) => val.trim().length > 0,
+          },
           cancel: this.$t('button.back'),
           persistent: true,
         })
-        .onOk(() => {
+        .onOk((reason) => {
           this.cancelMembershipLoading = true;
           this.$axios
-            .post(`/api/admin/members/${this.member.id}/billing/cancel/`)
+            .post(`/api/admin/members/${this.member.id}/billing/cancel/`, {
+              reason,
+            })
             .then((res) => {
               if (res.data.success) {
                 this.$q.dialog({

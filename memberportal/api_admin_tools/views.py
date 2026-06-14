@@ -886,6 +886,13 @@ class AdminCancelMembership(StripeAPIView):
     def post(self, request, member_id):
         member = User.objects.get(id=member_id)
 
+        reason = request.data.get("reason", "").strip()
+        if not reason:
+            return Response(
+                {"success": False, "message": "A reason for cancellation is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         if not member.profile.stripe_subscription_id:
             return Response(
                 {"success": False, "message": "No active subscription found."},
@@ -907,27 +914,28 @@ class AdminCancelMembership(StripeAPIView):
             member.profile.subscription_status = "cancelling"
             member.profile.save()
 
+            staff_name = request.user.get_full_name()
             admin_subject = (
-                f"{request.user.get_full_name()} cancelled the membership for "
+                f"{staff_name} cancelled the membership for "
                 f"{member.profile.get_full_name()} (on their behalf)."
             )
             send_email_to_admin(
                 subject=admin_subject,
                 template_vars={
                     "title": admin_subject,
-                    "message": "The membership is scheduled to become inactive at the end of the current billing period.",
+                    "message": f"Reason: {reason}\n\nThe membership is scheduled to become inactive at the end of the current billing period.",
                 },
                 user=member,
                 reply_to=request.user.email,
             )
 
             member.email_notification(
-                "Your membership is scheduled to become inactive.",
-                "Your membership is scheduled to become inactive at the end of your current billing period. You can reactivate your membership at any time from the member portal.",
+                "Your membership has been cancelled.",
+                f"Your membership has been cancelled by {staff_name}.\n\nReason: {reason}\n\nYour membership will remain active until the end of the current billing period.",
             )
 
             member.log_event(
-                f"Membership set to cancelling by staff ({request.user.get_full_name()}).",
+                f"Membership set to cancelling by staff ({staff_name}). Reason: {reason}",
                 "stripe",
             )
 

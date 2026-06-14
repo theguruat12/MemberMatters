@@ -505,7 +505,8 @@ export default {
     noMembers: 'No members were found that match your filter or search query.',
     cancelMembership: 'Cancel Membership',
     cancelMembershipConfirm:
-      "Are you sure you want to cancel this member's membership? Their membership will remain active until the end of the current billing period.",
+      "Are you sure you want to cancel this member's membership? Their membership will remain active until the end of the current billing period. The member will receive an email with your name and the reason you provide.",
+    cancelMembershipReason: 'Reason for cancellation',
     cancelMembershipSuccess:
       'Membership successfully scheduled for cancellation.',
     cancelMembershipFailed: 'Failed to cancel membership.',
