@@ -6,9 +6,8 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('profile', '0018_discord_handle'),
-        ('profile', '0018_emergency_contact'),
+        ("profile", "0018_discord_handle"),
+        ("profile", "0018_emergency_contact"),
     ]
 
-    operations = [
-    ]
+    operations = []
