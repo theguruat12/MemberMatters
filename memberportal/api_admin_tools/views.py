@@ -876,6 +876,93 @@ class MemberBillingInfo(StripeAPIView):
         return Response(billing_info)
 
 
+class AdminCancelMembership(StripeAPIView):
+    """
+    post: Cancels a member's subscription at period end, on behalf of staff.
+    """
+
+    permission_classes = (permissions.IsAdminUser | HasAPIKey,)
+
+    def post(self, request, member_id):
+        member = User.objects.get(id=member_id)
+
+        reason = request.data.get("reason", "").strip()
+        if not reason:
+            return Response(
+                {"success": False, "message": "A reason for cancellation is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not member.profile.stripe_subscription_id:
+            return Response(
+                {"success": False, "message": "No active subscription found."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if member.profile.subscription_status != "active":
+            return Response(
+                {"success": False, "message": "Subscription is not active."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        modified_subscription = stripe.Subscription.modify(
+            member.profile.stripe_subscription_id,
+            cancel_at_period_end=True,
+        )
+
+        if modified_subscription.cancel_at_period_end:
+            member.profile.subscription_status = "cancelling"
+            member.profile.save()
+
+            staff_name = request.user.get_full_name()
+            admin_subject = (
+                f"{staff_name} cancelled the membership for "
+                f"{member.profile.get_full_name()} (on their behalf)."
+            )
+            send_email_to_admin(
+                subject=admin_subject,
+                template_vars={
+                    "title": admin_subject,
+                    "message": f"Reason: {reason}\n\nThe membership is scheduled to become inactive at the end of the current billing period.",
+                },
+                user=member,
+                reply_to=request.user.email,
+            )
+
+            member.email_notification(
+                "Your membership has been cancelled.",
+                f"Your membership has been cancelled by {staff_name}.\n\nReason: {reason}\n\nYour membership will remain active until the end of the current billing period.",
+            )
+
+            member.log_event(
+                f"Membership set to cancelling by staff ({staff_name}). Reason: {reason}",
+                "stripe",
+            )
+
+            return Response({"success": True})
+
+        else:
+            admin_subject = (
+                f"{request.user.get_full_name()} failed to cancel the membership for "
+                f"{member.profile.get_full_name()}."
+            )
+            send_email_to_admin(
+                subject=admin_subject,
+                template_vars={
+                    "title": admin_subject,
+                    "message": "We're not sure what happened, you should check Stripe and contact the member.",
+                },
+                user=member,
+                reply_to=request.user.email,
+            )
+            member.log_event(
+                f"Staff ({request.user.get_full_name()}) attempted to set membership to cancelling but it failed.",
+                "stripe",
+            )
+
+            return Response({"success": False})
+
+
 class MemberLogs(APIView):
     """
     get: This method gets a member's logs.
