@@ -1,0 +1,30 @@
+name: Django Migration Check
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  check-migrations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install system dependencies
+        run: sudo apt-get install -y default-libmysqlclient-dev pkg-config
+
+      - name: Install Python dependencies
+        run: pip install -r memberportal/requirements.txt
+
+      - name: Check for conflicting or missing migrations
+        working-directory: memberportal
+        env:
+          MM_DB_LOCATION: /tmp/db.sqlite3
+          MM_LOG_LOCATION: /tmp/django.log
+        run: |
+          python manage.py migrate
+          python manage.py makemigrations --check
