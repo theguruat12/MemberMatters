@@ -352,11 +352,11 @@
               class="col-12 col-md-6"
               :class="{ 'q-px-sm': $q.screen.xs, 'q-px-lg': !$q.screen.xs }"
             >
-              <h5 class="q-my-sm text-negative">
+              <h5 class="q-my-sm">
                 {{ $t('form.emergencyContact') }}
               </h5>
 
-              <q-list bordered padding class="rounded-borders bg-red-1 q-mb-md">
+              <q-list bordered padding class="rounded-borders">
                 <q-item>
                   <q-item-section>
                     <q-item-label>
