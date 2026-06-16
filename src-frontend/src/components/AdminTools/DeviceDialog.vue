@@ -2,7 +2,7 @@
   <q-dialog ref="dialog" @hide="onDialogHide">
     <!-- <q-card class="q-dialog-plugin"> -->
     <q-card
-      class="q-dialog-plugin"
+      class="q-dialog-plugin column"
       style="max-width: 800px; width: 100%; height: 650px"
     >
       <!-- <h3>
@@ -23,7 +23,7 @@
         />
       </q-tabs>
       <q-separator />
-      <q-tab-panels v-model="tab" animated>
+      <q-tab-panels v-model="tab" animated class="col" style="overflow-y: auto">
         <q-tab-panel name="manageDevice" class="q-px-lg q-py-lg">
           <q-card-section>
             <q-form ref="formRef">
@@ -421,7 +421,7 @@
         </q-card>
       </q-dialog>
 
-      <q-card-actions align="right" class="row absolute-bottom">
+      <q-card-actions align="right" class="row">
         <div class="q-pr-sm">
           {{ device.name }}
         </div>
