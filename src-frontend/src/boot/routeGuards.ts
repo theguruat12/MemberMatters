@@ -56,6 +56,13 @@ export default boot(({ router, store }) => {
     )
       return next({ name: 'Error403MemberOnly' });
 
+    // check profile-level capability flag
+    if (
+      to.meta.profileFlag &&
+      !store.getters['profile/profile'][to.meta.profileFlag]
+    )
+      return next({ name: 'Error403' });
+
     // if we are authenticating via SSO then don't update the route unless we're registering
     if (!from.query.sso || to.name === 'register') {
       return next();

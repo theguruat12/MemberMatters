@@ -3,12 +3,12 @@
     <p class="text-body1 text-center q-pa-md">
       {{ $t('access.pageDescription') }}
     </p>
-    <div class="column full-width" style="max-width: 800px">
+    <div class="column full-width items-center" style="max-width: 800px">
       <q-banner
         v-if="profile.memberStatus !== 'active'"
         inline-actions
         rounded
-        class="bg-orange text-white q-ma-md"
+        class="bg-orange text-white q-ma-md full-width"
       >
         <template v-slot:avatar>
           <q-icon :name="icons.warning" />
@@ -16,7 +16,7 @@
         {{ $t('access.inactive') }}
       </q-banner>
 
-      <access-list />
+      <access-list class="full-width" />
     </div>
   </q-page>
 </template>

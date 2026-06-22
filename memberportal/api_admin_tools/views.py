@@ -1,3 +1,4 @@
+import csv
 import json
 
 import stripe
@@ -8,6 +9,7 @@ from constance.backends.database.models import Constance as ConstanceSetting
 from django.db.models import F, Sum, Value, CharField, Count, Max
 from django.db.models.functions import Concat
 from django.db.utils import OperationalError
+from django.http import HttpResponse
 from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
@@ -17,7 +19,7 @@ from sentry_sdk import capture_exception
 from sentry_sdk import capture_message
 
 from access import models
-from access.models import DoorLog, InterlockLog
+from access.models import DoorLog, InterlockLog, InterlockAccessGrant
 from memberbucks.models import (
     MemberBucks,
     MemberbucksProductPurchaseLog,
@@ -107,7 +109,11 @@ class MakeMember(APIView):
 
             # give default interlock access
             for interlock in models.Interlock.objects.filter(all_members=True):
-                user.profile.interlocks.add(interlock)
+                InterlockAccessGrant.objects.get_or_create(
+                    profile=user.profile,
+                    interlock=interlock,
+                    defaults={"granted_by": request.user},
+                )
 
             # send the welcome email
             email = user.email_welcome()
@@ -281,11 +287,27 @@ class Doors(APIView):
 class Interlocks(APIView):
     """
     get: returns a list of interlocks.
+    post: create a new interlock.
     put: update a specific interlock.
     delete: delete a specific interlock.
     """
 
     permission_classes = (permissions.IsAdminUser,)
+
+    def post(self, request):
+        data = request.data
+        name = data.get("name", "").strip()
+        if not name:
+            return Response(
+                {"error": "Name is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        interlock = models.Interlock.objects.create(
+            name=name,
+            description=data.get("description", ""),
+            ip_address=data.get("ipAddress") or None,
+        )
+        return Response({"id": interlock.id}, status=status.HTTP_201_CREATED)
 
     def get(self, request):
         interlocks = models.Interlock.objects.all()
@@ -329,6 +351,22 @@ class Interlocks(APIView):
                 "hiddenToMembers": interlock.hidden,
                 "totalTimeSeconds": total_time_seconds,
                 "userStats": list(stats),
+                "authorisedMembers": [
+                    {
+                        "userId": g.profile.user.id,
+                        "name": g.profile.get_full_name(),
+                        "role": g.role,
+                        "grantedBy": (
+                            g.granted_by.profile.get_full_name()
+                            if g.granted_by
+                            else None
+                        ),
+                        "grantedDate": g.granted_date,
+                    }
+                    for g in InterlockAccessGrant.objects.filter(
+                        interlock=interlock
+                    ).select_related("profile__user", "granted_by__profile")
+                ],
             }
 
         return Response(map(get_interlock, interlocks))
@@ -370,11 +408,15 @@ class Interlocks(APIView):
 
             for member in members:
                 if all_members_added:
-                    member.profile.interlocks.add(interlock)
+                    InterlockAccessGrant.objects.get_or_create(
+                        profile=member.profile,
+                        interlock=interlock,
+                        defaults={"granted_by": None},
+                    )
                 else:
-                    member.profile.interlocks.remove(interlock)
-
-                member.profile.save()
+                    InterlockAccessGrant.objects.filter(
+                        profile=member.profile, interlock=interlock
+                    ).delete()
 
         if (
             all_members_added
@@ -398,6 +440,49 @@ class Interlocks(APIView):
         interlock.delete()
 
         return Response()
+
+
+class InterlockAccessCSV(APIView):
+    """
+    get: Returns a CSV of all interlock access grants (interlock, member, role, granted by, date).
+    """
+
+    permission_classes = (permissions.IsAdminUser,)
+
+    def get(self, request):
+        grants = InterlockAccessGrant.objects.select_related(
+            "interlock",
+            "profile__user",
+            "granted_by__profile",
+        ).order_by("interlock__name", "role", "profile__first_name")
+
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="interlock_access.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(
+            [
+                "Interlock",
+                "Member Name",
+                "Member Email",
+                "Role",
+                "Granted By",
+                "Granted Date",
+            ]
+        )
+        for g in grants:
+            writer.writerow(
+                [
+                    g.interlock.name,
+                    g.profile.get_full_name(),
+                    g.profile.user.email,
+                    g.role,
+                    g.granted_by.profile.get_full_name() if g.granted_by else "",
+                    g.granted_date.strftime("%Y-%m-%d %H:%M") if g.granted_date else "",
+                ]
+            )
+
+        return response
 
 
 class MemberbucksDevices(APIView):

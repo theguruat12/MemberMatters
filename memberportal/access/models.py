@@ -18,6 +18,9 @@ from django.utils import timezone
 import pytz
 from django.conf import settings
 from django.contrib import auth
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 import uuid
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
@@ -565,3 +568,54 @@ class InterlockLog(ExportModelOperationsMixin("interlock-log"), models.Model):
             )
 
             return True
+
+
+class InterlockAccessGrant(
+    ExportModelOperationsMixin("interlock-access-grant"), models.Model
+):
+    """Records when and by whom a member was granted/assigned a role on an interlock."""
+
+    ROLE_USER = "user"
+    ROLE_TRAINER = "trainer"
+    ROLE_CHOICES = [
+        (ROLE_USER, "User"),
+        (ROLE_TRAINER, "Trainer"),
+    ]
+
+    LEVEL_NONE = 0
+    LEVEL_USER = 1
+    LEVEL_TRAINER = 2
+    LEVEL_STAFF = 99
+
+    ROLE_LEVELS = {ROLE_USER: LEVEL_USER, ROLE_TRAINER: LEVEL_TRAINER}
+
+    profile = models.ForeignKey(
+        "profile.Profile",
+        on_delete=models.CASCADE,
+        related_name="interlock_grants",
+    )
+    interlock = models.ForeignKey(
+        Interlock,
+        on_delete=models.CASCADE,
+        related_name="access_grants",
+    )
+    granted_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="interlock_grants_given",
+    )
+    granted_date = models.DateTimeField(auto_now_add=True)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=ROLE_USER)
+
+    class Meta:
+        unique_together = [("profile", "interlock")]
+
+    @property
+    def role_level(self):
+        return self.ROLE_LEVELS.get(self.role, self.LEVEL_NONE)
+
+    def __str__(self):
+        granter = self.granted_by.email if self.granted_by else "system"
+        return f"{self.profile} → {self.interlock.name} [{self.role}] (by {granter})"

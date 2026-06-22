@@ -2,7 +2,7 @@
   <q-dialog ref="dialog" @hide="onDialogHide">
     <!-- <q-card class="q-dialog-plugin"> -->
     <q-card
-      class="q-dialog-plugin"
+      class="q-dialog-plugin column"
       style="max-width: 800px; width: 100%; height: 650px"
     >
       <!-- <h3>
@@ -16,9 +16,14 @@
       >
         <q-tab name="manageDevice" :label="$t('menuLink.manageDevice')" />
         <q-tab name="stats" :label="$t('adminTools.stats')" />
+        <q-tab
+          v-if="deviceType === 'interlocks'"
+          name="roles"
+          :label="$t('access.rolesTab')"
+        />
       </q-tabs>
       <q-separator />
-      <q-tab-panels v-model="tab" animated>
+      <q-tab-panels v-model="tab" animated class="col" style="overflow-y: auto">
         <q-tab-panel name="manageDevice" class="q-px-lg q-py-lg">
           <q-card-section>
             <q-form ref="formRef">
@@ -259,9 +264,164 @@
             </q-table>
           </div>
         </q-tab-panel>
+
+        <!-- Roles tab (interlocks only) -->
+        <q-tab-panel
+          v-if="deviceType === 'interlocks'"
+          name="roles"
+          class="q-pa-md"
+          style="overflow-y: auto; max-height: 480px"
+        >
+          <!-- Trainers section -->
+          <div class="q-mb-md">
+            <div class="row items-center q-mb-xs">
+              <div class="text-subtitle2 col">
+                <q-badge color="blue" class="q-mr-xs">{{
+                  $t('access.roleTrainer')
+                }}</q-badge>
+                {{ $t('access.roleTrainer') }}s
+              </div>
+              <q-btn
+                flat
+                dense
+                size="sm"
+                color="blue"
+                :icon="icons.addAlternative"
+                :label="$t('access.assignTrainer')"
+                @click="openRoleAssign('trainer')"
+              />
+            </div>
+            <q-list bordered separator dense>
+              <q-item v-if="!membersWithRole('trainer').length">
+                <q-item-section class="text-grey-6 text-caption">{{
+                  $t('access.noMembersWithAccess')
+                }}</q-item-section>
+              </q-item>
+              <q-item v-for="m in membersWithRole('trainer')" :key="m.userId">
+                <q-item-section>
+                  <q-item-label>{{ m.name }}</q-item-label>
+                  <q-item-label v-if="m.grantedBy" caption>{{
+                    $t('access.grantedBy', { name: m.grantedBy })
+                  }}</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-btn
+                    flat
+                    dense
+                    round
+                    icon="mdi-account-remove"
+                    color="negative"
+                    size="sm"
+                    @click="revokeRole(m.userId, 'trainer')"
+                  >
+                    <q-tooltip>{{ $t('access.revokeTrainer') }}</q-tooltip>
+                  </q-btn>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </div>
+
+          <!-- Authorised members section -->
+          <div>
+            <div class="row items-center q-mb-xs">
+              <div class="text-subtitle2 col">
+                <q-badge color="green" class="q-mr-xs">{{
+                  $t('access.roleUser')
+                }}</q-badge>
+                {{ $t('access.roleUser') }} Members
+              </div>
+              <q-btn
+                flat
+                dense
+                size="sm"
+                color="green"
+                :icon="icons.addAlternative"
+                :label="$t('access.grantAccess')"
+                @click="openRoleAssign('user')"
+              />
+            </div>
+            <q-list bordered separator dense>
+              <q-item v-if="!membersWithRole('user').length">
+                <q-item-section class="text-grey-6 text-caption">{{
+                  $t('access.noMembersWithAccess')
+                }}</q-item-section>
+              </q-item>
+              <q-item v-for="m in membersWithRole('user')" :key="m.userId">
+                <q-item-section>
+                  <q-item-label>{{ m.name }}</q-item-label>
+                  <q-item-label v-if="m.grantedBy" caption>{{
+                    $t('access.grantedBy', { name: m.grantedBy })
+                  }}</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-btn
+                    flat
+                    dense
+                    round
+                    icon="mdi-account-remove"
+                    color="negative"
+                    size="sm"
+                    @click="revokeRole(m.userId, 'user')"
+                  >
+                    <q-tooltip>{{ $t('access.revokeAccess') }}</q-tooltip>
+                  </q-btn>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </div>
+        </q-tab-panel>
       </q-tab-panels>
 
-      <q-card-actions align="right" class="row absolute-bottom">
+      <!-- Member search dialog for role assignment -->
+      <q-dialog v-model="roleAssignDialog">
+        <q-card style="min-width: 350px">
+          <q-card-section class="row items-center">
+            <div class="text-h6">{{ roleAssignTarget.label }}</div>
+            <q-space />
+            <q-btn icon="mdi-close" flat round dense v-close-popup />
+          </q-card-section>
+          <q-card-section>
+            <q-select
+              v-model="selectedRoleMember"
+              use-input
+              clearable
+              outlined
+              :label="$t('access.searchMembers')"
+              :options="roleMemberOptions"
+              option-label="name"
+              option-value="id"
+              @filter="searchRoleMembers"
+            >
+              <template v-slot:option="scope">
+                <q-item v-bind="scope.itemProps">
+                  <q-item-section>
+                    <q-item-label>{{ scope.opt.name }}</q-item-label>
+                    <q-item-label caption>{{ scope.opt.email }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </template>
+              <template v-slot:no-option>
+                <q-item>
+                  <q-item-section class="text-grey"
+                    >Type to search members</q-item-section
+                  >
+                </q-item>
+              </template>
+            </q-select>
+          </q-card-section>
+          <q-card-actions align="right">
+            <q-btn flat :label="$t('button.cancel')" v-close-popup />
+            <q-btn
+              :label="roleAssignTarget.label"
+              color="primary"
+              :disable="!selectedRoleMember"
+              @click="confirmRoleAssign"
+            />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+
+      <q-card-actions align="right" class="row">
         <div class="q-pr-sm">
           {{ device.name }}
         </div>
@@ -292,7 +452,9 @@ import formatMixin from '@mixins/formatMixin';
 import SavedNotification from '@components/SavedNotification.vue';
 
 export default {
-  setup() {useCtrlF('.search-input input');},
+  setup() {
+    useCtrlF('.search-input input');
+  },
   emits: ['ok', 'cancel', 'hide'],
   components: {
     SavedNotification,
@@ -327,6 +489,10 @@ export default {
         reboot: false,
         sync: false,
       },
+      roleAssignDialog: false,
+      roleAssignTarget: { role: 'user', label: '' },
+      selectedRoleMember: null,
+      roleMemberOptions: [],
       filter: '',
       devicePagination: {
         sortBy: 'desc',
@@ -587,6 +753,80 @@ export default {
       this.hide();
     },
 
+    membersWithRole(role) {
+      return (this.device.authorisedMembers || []).filter(
+        (m) => m.role === role
+      );
+    },
+    openRoleAssign(role) {
+      const label =
+        role === 'trainer'
+          ? this.$t('access.assignTrainer')
+          : this.$t('access.grantAccess');
+      this.roleAssignTarget = { role, label };
+      this.selectedRoleMember = null;
+      this.roleMemberOptions = [];
+      this.roleAssignDialog = true;
+    },
+    searchRoleMembers(val, update) {
+      if (val.length < 2) {
+        update(() => {
+          this.roleMemberOptions = [];
+        });
+        return;
+      }
+      this.$axios
+        .get('/api/access/members/search/', { params: { q: val } })
+        .then((response) => {
+          update(() => {
+            this.roleMemberOptions = response.data;
+          });
+        })
+        .catch(() => {
+          update(() => {
+            this.roleMemberOptions = [];
+          });
+        });
+    },
+    confirmRoleAssign() {
+      const { role } = this.roleAssignTarget;
+      const userId = this.selectedRoleMember.id;
+      const deviceId = this.device.id;
+      const endpoint =
+        role === 'trainer'
+          ? `/api/access/interlocks/${deviceId}/assign-trainer/${userId}/`
+          : `/api/access/interlocks/${deviceId}/authorise/${userId}/`;
+      this.$axios
+        .put(endpoint)
+        .then(() => {
+          this.roleAssignDialog = false;
+          this.getInterlocks().then(() => this.initForm());
+        })
+        .catch(() => {
+          this.$q.dialog({
+            title: this.$t('error.error'),
+            message: this.$t('error.requestFailed'),
+          });
+        });
+    },
+    revokeRole(userId, currentRole) {
+      const deviceId = this.device.id;
+      const endpoint =
+        currentRole === 'trainer'
+          ? `/api/access/interlocks/${deviceId}/revoke-trainer/${userId}/`
+          : `/api/access/interlocks/${deviceId}/revoke/${userId}/`;
+      this.$axios
+        .put(endpoint)
+        .then(() => {
+          this.getInterlocks().then(() => this.initForm());
+        })
+        .catch(() => {
+          this.$q.dialog({
+            title: this.$t('error.error'),
+            message: this.$t('error.requestFailed'),
+          });
+        });
+    },
     onNextClick() {
       this.deviceIndex = this.deviceIndex + 1;
       this.initForm();

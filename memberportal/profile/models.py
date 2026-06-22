@@ -358,7 +358,9 @@ class Profile(ExportModelOperationsMixin("profile"), models.Model):
         "RFID Tag", max_length=20, unique=True, null=True, blank=True
     )
     doors = models.ManyToManyField("access.Doors", blank=True)
-    interlocks = models.ManyToManyField("access.Interlock", blank=True)
+    interlocks = models.ManyToManyField(
+        "access.Interlock", blank=True, through="access.InterlockAccessGrant"
+    )
     memberbucks_balance = models.FloatField(default=0.0)
     last_memberbucks_purchase = models.DateTimeField(default=timezone.now)
     must_update_profile = models.BooleanField(default=False)
@@ -609,11 +611,22 @@ class Profile(ExportModelOperationsMixin("profile"), models.Model):
                     }
                 )
 
+        from access.models import InterlockAccessGrant
+
+        grants = {
+            g.interlock_id: g
+            for g in InterlockAccessGrant.objects.filter(profile=self).select_related(
+                "granted_by__profile"
+            )
+        }
+
         for interlock in Interlock.objects.all():
             if interlock.hidden:
                 continue
 
-            if interlock in self.interlocks.all() and user_active:
+            grant = grants.get(interlock.id)
+            if grant and user_active:
+                granter = grant.granted_by
                 interlocks.append(
                     {
                         "name": interlock.name,
@@ -621,9 +634,13 @@ class Profile(ExportModelOperationsMixin("profile"), models.Model):
                         "id": interlock.id,
                         "locked_out": interlock.locked_out,
                         "offline": interlock.get_unavailable(),
+                        "role": grant.role,
+                        "grantedBy": (
+                            granter.profile.get_full_name() if granter else None
+                        ),
+                        "grantedDate": grant.granted_date,
                     }
                 )
-
             else:
                 interlocks.append(
                     {
@@ -632,6 +649,9 @@ class Profile(ExportModelOperationsMixin("profile"), models.Model):
                         "id": interlock.id,
                         "locked_out": interlock.locked_out,
                         "offline": interlock.get_unavailable(),
+                        "role": None,
+                        "grantedBy": None,
+                        "grantedDate": None,
                     }
                 )
 

@@ -111,7 +111,17 @@
                   <div v-else>({{ $t('access.unauthorised') }})</div>
                 </q-item-label>
                 <q-item-label v-else-if="interlock.access === true" caption>
-                  {{ $t('access.authorised') }}
+                  <q-badge
+                    v-if="interlock.role === 'trainer'"
+                    color="blue"
+                    class="q-mr-xs"
+                    >{{ $t('access.roleTrainer') }}</q-badge
+                  >
+                  <span v-if="interlock.grantedBy">
+                    {{ $t('access.grantedBy', { name: interlock.grantedBy }) }}
+                    {{ formatDate(interlock.grantedDate, false) }}
+                  </span>
+                  <span v-else>{{ $t('access.roleUser') }}</span>
                 </q-item-label>
                 <q-item-label v-else caption>
                   {{ $t('access.unauthorised') }}
@@ -130,6 +140,7 @@
 import { mapActions, mapGetters } from 'vuex';
 import RefreshDataDialog from '@components/RefreshDataDialog.vue';
 import icons from '@icons';
+import { formatDate } from '@mixins/formatMixin';
 
 export default {
   name: 'AccessList',
@@ -181,6 +192,7 @@ export default {
   },
   methods: {
     ...mapActions('profile', ['getAccess']),
+    formatDate,
     /**
      * this method returns a specific user's access permissions
      */
