@@ -5,14 +5,14 @@ jobs:
   semgrep:
     name: Security Scan
     runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Install Semgrep
-      run: pip install semgrep
-
     # Run the open-source community rulesets (OWASP top 10, security, etc.)
+    # --error makes the job fail (non-zero exit) when findings are present
     - name: Run Semgrep Scan
-      run: semgrep scan --config auto
+      run: semgrep scan --config auto --error
