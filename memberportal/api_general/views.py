@@ -5,6 +5,8 @@ from django.contrib.auth import (
     login,
     logout,
 )
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 import logging
 from constance import config
 import json
@@ -350,6 +352,11 @@ class ResetPassword(APIView):
                 user
                 and utc.localize(datetime.datetime.now()) < user.password_reset_expire
             ):
+                try:
+                    validate_password(body.get("password"), user=user)
+                except ValidationError as e:
+                    return Response({"success": False, "errors": e.messages})
+
                 user.set_password(body.get("password"))
                 user.password_reset_key = None
                 user.password_reset_expire = None
@@ -484,6 +491,14 @@ class ApiPassword(APIView):
         new = body.get("new")
 
         if user.check_password(current):
+            try:
+                validate_password(new, user=user)
+            except ValidationError as e:
+                return Response(
+                    {"success": False, "errors": e.messages},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             user.set_password(new)
             user.save()
 
@@ -671,6 +686,16 @@ class Register(APIView):
             return Response(
                 {"message": "error.screenNameAlreadyExists"},
                 status=status.HTTP_409_CONFLICT,
+            )
+
+        try:
+            validate_password(
+                body.get("password"), user=User(email=body.get("email").lower())
+            )
+        except ValidationError as e:
+            return Response(
+                {"message": "error.invalidPassword", "errors": e.messages},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         new_user = User.objects.create(
