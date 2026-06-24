@@ -149,9 +149,14 @@
                   outlined
                   :debounce="debounceLength"
                   :label="$t('form.rfidCard')"
+                  maxlength="8"
                   :rules="[
                     (val) =>
-                      validateNotEmpty(val) || $t('validation.cannotBeEmpty'),
+                      !val ||
+                      /^\d+$/.test(val) ||
+                      $t('validation.rfidMustBeNumeric'),
+                    (val) =>
+                      !val || val.length <= 8 || $t('validation.rfidTooLong'),
                     (val) => checkRfidUniqueness(val),
                   ]"
                   @update:model-value="saveChange('rfidCard')"
