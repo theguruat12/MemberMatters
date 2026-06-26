@@ -188,6 +188,7 @@ export default {
     cannotBeEmpty: 'Detta fält kan inte vara tomt.',
     rfidMustBeNumeric: 'RFID-taggen får bara innehålla siffror.',
     rfidTooLong: 'RFID-taggen får vara högst 8 siffror.',
+    rfidAlreadyInUse: 'RFID-taggen är redan tilldelad {name}.',
     futureDate: 'Datum måste vara idag eller i framtiden.',
     tooMany: 'Max är {number}.',
   },
@@ -599,8 +600,26 @@ export default {
     requirementsNotMet: 'Krav som inte uppnåtts:',
     subscriptionFailed:
       'Vi har tyvärr problem med att skapa ditt abonnemang. Kontrollera saldo på ditt betalkort, försök igen eller kontakta oss för hjälp.',
-    existingMemberSubscription:
-      'Du har redan ett aktivt abonnemang på Stripe.',
+    existingMemberSubscription: 'Du har redan ett aktivt abonnemang på Stripe.',
+    skipNotAllowed:
+      'Du kan inte skippa registreringen medan du har ett aktivt eller väntande abonnemang. Avsluta ditt abonnemang från medlemskapssidan först.',
+    noMoodleAccount:
+      'Vi kunde inte hitta ett Moodle-konto kopplat till din email-adress. Se till att du har skapat ditt Moodle-konto med samma email-adress som du använde vid registreringen här, och försök sedan igen.',
+    moodleUnavailable:
+      'Vi kunde inte nå Moodle för att kontrollera dina framsteg i introduktionen. Försök igen om en stund, eller kontakta oss om problemet kvarstår.',
+  },
+  accessCard: {
+    memberEntryDisabled:
+      'Självregistrering av nyckelkort är för närvarande avstängd. Kontakta oss för att få ditt kort registrerat.',
+    required: 'Ange ett nyckelkortsnummer.',
+    adminRebindRequired:
+      'Du kan inte ändra ditt nyckelkort själv efter aktivering. Kontakta oss om ditt kort behöver bytas.',
+    alreadyBound:
+      'Du har redan ett nyckelkort registrerat. Kontakta oss om det behöver bytas.',
+    alreadyInUse:
+      'Det nyckelkortet är redan registrerat på en annan medlem. Dubbelkolla numret eller kontakta oss om du tror det är ett misstag.',
+    mustBeNumeric: 'Nyckelkortsnumret får bara innehålla siffror.',
+    tooLong: 'Nyckelkortsnumret får vara högst 8 siffror.',
   },
   tiers: {
     disabledFeature:
