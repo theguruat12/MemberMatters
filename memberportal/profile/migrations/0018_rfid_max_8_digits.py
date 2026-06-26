@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("profile", "0020_interlock_access_grant_through"),
+        ("profile", "0017_alter_log_logtype"),
     ]
 
     operations = [
