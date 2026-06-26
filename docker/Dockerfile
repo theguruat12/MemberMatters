@@ -50,6 +50,14 @@ RUN python3 manage.py collectstatic --noinput
 ADD docker/nginx.conf /etc/nginx/nginx.conf
 ADD docker /usr/src/app/docker
 
+# Run as a non-root user. Nginx, Django and Celery only ever need to write to
+# /usr/src/data and /usr/src/logs (both declared as VOLUMEs above), so those
+# are the only paths that need to change ownership. The uid/gid is pinned so
+# docker-compose.yml's tmpfs mounts for nginx's scratch dirs can match it.
+RUN groupadd -r -g 999 mm && useradd -r -u 999 -g mm mm \
+    && chown -R mm:mm /usr/src/data /usr/src/logs
+USER mm
+
 # Expose the port and run the app
 EXPOSE 8000
 CMD ["sh", "/usr/src/app/docker/container_start.sh"]

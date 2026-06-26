@@ -68,9 +68,10 @@ class SpaceDirectoryStatus(APIView):
                 }
 
                 ### Do we have properties? If so, let's add them
-                if len(sensor.properties.all()) > 0:
+                sensor_properties = list(sensor.properties.all())
+                if sensor_properties:
                     sensor_details["properties"] = {}
-                    for prop in sensor.properties.all():
+                    for prop in sensor_properties:
                         properties = {
                             prop.name: {"value": prop.value, "unit": prop.unit}
                         }

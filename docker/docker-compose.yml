@@ -11,6 +11,12 @@ services:
       - "5432:5432"
     volumes:
       - mm-postgres-volume:/var/lib/postgresql/data
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/run/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U membermatters"]
       interval: 5s
@@ -23,6 +29,11 @@ services:
     restart: always
     depends_on:
       - mm-postgres
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /data
 
   # MemberMatters
   mm-webapp:
@@ -38,6 +49,17 @@ services:
     depends_on:
       - mm-postgres
       - mm-redis
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      # nginx's Debian defaults need a few scratch dirs outside of the app's
+      # own volumes (proxy/fastcgi/scgi/uwsgi temp dirs live under here).
+      # uid/gid 999 is the non-root "mm" user set up in docker/Dockerfile.
+      - /var/lib/nginx:uid=999,gid=999
+      - /var/log/nginx:uid=999,gid=999
+      # large file uploads spill from memory to disk via Python's tempfile
+      - /tmp:uid=999,gid=999
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000"]
       interval: 5s
@@ -56,6 +78,12 @@ services:
     depends_on:
       - mm-webapp
       - mm-redis
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      # billiard's prefork pool needs a writable tempdir to start at all
+      - /tmp:uid=999,gid=999
 
   # MemberMatters Celery Beat
   mm-celery-beat:
@@ -70,6 +98,9 @@ services:
       - mm-webapp
       - mm-celery-worker
       - mm-redis
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
 
   mm-celery-prom-exporter:
     image: danihodovic/celery-exporter
@@ -79,6 +110,9 @@ services:
     depends_on:
       - mm-celery-worker
       - mm-redis
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
 
 volumes:
   mm-postgres-volume:

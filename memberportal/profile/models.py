@@ -9,6 +9,7 @@ from django.contrib.auth.models import (
     PermissionsMixin,
 )
 from django.core.validators import RegexValidator
+from django.contrib.auth.password_validation import validate_password
 from django.conf import settings
 from constance import config
 from api_general.models import SiteSession
@@ -125,6 +126,7 @@ class UserManager(BaseUserManager):
         user = self.model(email=self.normalize_email(email))
 
         user.is_superuser = is_superuser
+        validate_password(password, user=user)
         user.set_password(password)
         user.save(using=self._db)
         return user

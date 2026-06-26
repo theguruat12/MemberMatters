@@ -70,6 +70,7 @@ export default {
   methods: {
     ...mapMutations('rfid', ['setConnected', 'setReaderUrl', 'setCardId']),
     connectReader() {
+      if (!this.readerUrl) return;
       const ws = new WebSocket(this.readerUrl, ['arduino']);
       // Vue.prototype.$rfid = ws;
 

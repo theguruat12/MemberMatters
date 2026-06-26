@@ -1,0 +1,24 @@
+name: "Semgrep SAST Analysis"
+on: [pull_request]
+
+jobs:
+  semgrep:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Debian marks the system Python as externally-managed (PEP 668), so
+    # install into a venv instead of `pip install` directly into it
+    - name: Install Semgrep
+      run: |
+        python3 -m venv .venv
+        .venv/bin/pip install semgrep
+        echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+
+    # Run the open-source community rulesets (OWASP top 10, security, etc.)
+    # --error makes the job fail (non-zero exit) when findings are present
+    - name: Run Semgrep Scan
+      run: semgrep scan --config auto --error
