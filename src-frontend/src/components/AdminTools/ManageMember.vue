@@ -758,112 +758,70 @@
 
             <div class="column q-gutter-y-sm full-width">
               <div class="text-h6">
-                {{ $t('adminTools.billingInfo') }}
+                {{ $t('adminTools.savedPaymentMethod') }}
               </div>
 
-              <q-markup-table
-                v-if="billing?.subscription"
-                bordered
-                padding
-                class="rounded-borders desktop-only"
-              >
-                <thead>
-                  <tr>
-                    <th class="text-left">
-                      {{ $t(`memberbucks.lastPurchase`) }}
-                    </th>
-                    <th class="text-left">
-                      {{ $t(`memberbucks.cardExpiry`) }}
-                    </th>
-                    <th class="text-left">{{ $t(`memberbucks.last4`) }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="text-left">
-                      <div v-if="billing?.memberbucks.lastPurchase">
-                        {{ this.formatWhen(billing?.memberbucks.lastPurchase) }}
-                        <q-tooltip :delay="500">
-                          {{
-                            this.formatDate(billing?.memberbucks.lastPurchase)
-                          }}
-                        </q-tooltip>
-                      </div>
-                      <div v-else>
-                        {{ $t('error.noValue') }}
-                      </div>
-                    </td>
-                    <td class="text-left">
-                      {{
-                        billing?.memberbucks.stripe_card_expiry ||
-                        $t('error.noValue')
-                      }}
-                    </td>
-                    <td class="text-left">
-                      {{
-                        billing?.memberbucks.stripe_card_last_digits ||
-                        $t('error.noValue')
-                      }}
-                    </td>
-                  </tr>
-                </tbody>
-              </q-markup-table>
+              <template v-if="member.stripe.last4 || member.stripe.cardExpiry">
+                <q-markup-table
+                  bordered
+                  padding
+                  class="rounded-borders desktop-only"
+                >
+                  <thead>
+                    <tr>
+                      <th class="text-left">
+                        {{ $t(`adminTools.cardExpiry`) }}
+                      </th>
+                      <th class="text-left">
+                        {{ $t(`adminTools.cardLast4`) }}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="text-left">
+                        {{ member.stripe.cardExpiry || $t('error.noValue') }}
+                      </td>
+                      <td class="text-left">
+                        {{ member.stripe.last4 || $t('error.noValue') }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </q-markup-table>
 
-              <q-list
-                bordered
-                padding
-                class="rounded-borders mobile-only"
-                style="max-width: 350px"
-              >
-                <q-item>
-                  <q-item-section>
-                    <q-item-label lines="1">
-                      <div v-if="billing?.memberbucks.lastPurchase">
-                        {{ this.formatWhen(billing?.memberbucks.lastPurchase) }}
-                        <q-tooltip :delay="500">
-                          {{
-                            this.formatDate(billing?.memberbucks.lastPurchase)
-                          }}
-                        </q-tooltip>
-                      </div>
-                      <div v-else>
-                        {{ $t('error.noValue') }}
-                      </div>
-                    </q-item-label>
-                    <q-item-label caption>
-                      {{ $t(`memberbucks.lastPurchase`) }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
+                <q-list
+                  bordered
+                  padding
+                  class="rounded-borders mobile-only"
+                  style="max-width: 350px"
+                >
+                  <q-item>
+                    <q-item-section>
+                      <q-item-label lines="1">
+                        {{ member.stripe.cardExpiry || $t('error.noValue') }}
+                      </q-item-label>
+                      <q-item-label caption>
+                        {{ $t(`adminTools.cardExpiry`) }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
 
-                <q-item>
-                  <q-item-section>
-                    <q-item-label lines="1">
-                      {{
-                        billing?.memberbucks.stripe_card_expiry ||
-                        $t('error.noValue')
-                      }}
-                    </q-item-label>
-                    <q-item-label caption>
-                      {{ $t(`memberbucks.cardExpiry`) }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
+                  <q-item>
+                    <q-item-section>
+                      <q-item-label lines="1">
+                        {{ member.stripe.last4 || $t('error.noValue') }}
+                      </q-item-label>
+                      <q-item-label caption>
+                        {{ $t(`adminTools.cardLast4`) }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </template>
 
-                <q-item>
-                  <q-item-section>
-                    <q-item-label lines="1">
-                      {{
-                        billing?.memberbucks.stripe_card_last_digits ||
-                        $t('error.noValue')
-                      }}
-                    </q-item-label>
-                    <q-item-label caption>
-                      {{ $t(`memberbucks.last4`) }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
+              <div v-else>
+                {{ $t('adminTools.noPaymentMethod') }}
+              </div>
             </div>
 
             <div class="column q-gutter-y-sm full-width">
