@@ -1,0 +1,47 @@
+version: 2
+updates:
+  # Keep GitHub Actions used in workflows up to date
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns:
+          - "*"
+
+  # Frontend npm dependencies
+  - package-ecosystem: npm
+    directory: /src-frontend
+    schedule:
+      interval: weekly
+    groups:
+      npm:
+        patterns:
+          - "*"
+
+  # Backend Python dependencies
+  - package-ecosystem: pip
+    directory: /memberportal
+    schedule:
+      interval: weekly
+    groups:
+      pip:
+        patterns:
+          - "*"
+
+  # Docs Python dependencies
+  - package-ecosystem: pip
+    directory: /docs
+    schedule:
+      interval: weekly
+    groups:
+      pip:
+        patterns:
+          - "*"
+
+  # Base image in the Dockerfile
+  - package-ecosystem: docker
+    directory: /docker
+    schedule:
+      interval: weekly
