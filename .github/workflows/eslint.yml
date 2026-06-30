@@ -1,13 +1,27 @@
 name: JavaScript Linter (eslint)
 on: [pull_request]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint-frontend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: ./src-frontend/package-lock.json
       - name: Install modules
         working-directory: ./src-frontend
-        run: npm i
+        run: npm ci
       - name: Run ESLint
         working-directory: ./src-frontend
         run: npm run lint
