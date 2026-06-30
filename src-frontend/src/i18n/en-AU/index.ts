@@ -457,6 +457,13 @@ export default {
     accountOnly: 'Account Only',
     enableAccess: 'Enable Access',
     disableAccess: 'Disable Access',
+    accessJustificationLabel: 'Justification',
+    enableAccessJustificationPrompt:
+      'Please provide a reason for enabling access.',
+    disableAccessJustificationPrompt:
+      'Please provide a reason for disabling access.',
+    noActiveBillingPlanWarning:
+      '⚠️ Warning: This member has no active billing plan.',
     sendWelcomeEmail: 'Send welcome email',
     sendSms: 'Send SMS to member',
     sendSmsModalTitle: 'Send {name} a one-way sms alert.',

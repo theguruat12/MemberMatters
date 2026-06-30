@@ -938,6 +938,7 @@
                 name: 'description',
                 label: 'Description',
                 field: 'description',
+                align: 'right',
                 sortable: true,
               },
               {
@@ -1025,23 +1026,42 @@
               </div>
             </template>
 
-            <template v-slot:body="props">
-              <q-tr :props="props">
-                <q-td v-for="col in props.cols" :key="col.name" :props="props">
-                  <template v-if="col.name === 'date'">
-                    <div>
-                      {{ this.formatWhen(col.value) }}
-                      <q-tooltip :delay="500">
-                        {{ this.formatDate(col.value) }}
-                      </q-tooltip>
-                    </div>
-                  </template>
+            <template v-slot:body-cell-description="props">
+              <q-td :props="props">
+                <div
+                  :ref="(el) => checkDescriptionOverflow(el, props.row.id)"
+                  class="log-desc"
+                  :class="{
+                    'log-desc--expanded': expandedLogRows[props.row.id],
+                    'log-desc--clickable': overflowingRows[props.row.id],
+                  }"
+                  @click="
+                    overflowingRows[props.row.id]
+                      ? toggleLogRow(props.row.id)
+                      : null
+                  "
+                >
+                  {{ props.value
+                  }}<q-icon
+                    v-if="
+                      overflowingRows[props.row.id] &&
+                      !expandedLogRows[props.row.id]
+                    "
+                    name="mdi-chevron-down"
+                    size="xs"
+                    class="q-ml-xs"
+                  />
+                </div>
+              </q-td>
+            </template>
 
-                  <template v-else>
-                    {{ col.value }}
-                  </template>
-                </q-td>
-              </q-tr>
+            <template v-slot:body-cell-date="props">
+              <q-td :props="props">
+                {{ formatWhen(props.value) }}
+                <q-tooltip :delay="500">
+                  {{ formatDate(props.value) }}
+                </q-tooltip>
+              </q-td>
             </template>
           </q-table>
 
@@ -1551,6 +1571,8 @@ export default defineComponent({
         doorLogs: [],
         interlockLogs: [],
       },
+      expandedLogRows: {} as Record<number, boolean>,
+      overflowingRows: {} as Record<number, boolean>,
       filter: '',
       userEventsFilter: '',
       doorFilter: '',
@@ -1573,6 +1595,16 @@ export default defineComponent({
     this.getMemberLogs();
   },
   methods: {
+    checkDescriptionOverflow(el: Element | null, id: number) {
+      if (el && !(id in this.overflowingRows)) {
+        requestAnimationFrame(() => {
+          this.overflowingRows[id] = el.scrollWidth > el.clientWidth;
+        });
+      }
+    },
+    toggleLogRow(id: number) {
+      this.expandedLogRows[id] = !this.expandedLogRows[id];
+    },
     loadInitialForm() {
       this.profileForm.email = this.selectedMember.email;
       this.profileForm.rfidCard = this.selectedMember.rfid;
@@ -1747,20 +1779,54 @@ export default defineComponent({
         });
     },
     setMemberState(state: MemberState) {
-      this.stateLoading = true;
-      this.$axios
-        .post(`/api/admin/members/${this.member.id}/state/${state}/`)
-        .catch(() => {
-          this.$q.dialog({
-            title: this.$t('error.error'),
-            message: this.$t('error.requestFailed'),
-          });
+      const isEnabling = state === 'active';
+      const showBillingWarning =
+        isEnabling &&
+        this.features.enableMembershipPayments &&
+        this.selectedMember.subscriptionStatus !== 'active';
+
+      let message = isEnabling
+        ? this.$t('adminTools.enableAccessJustificationPrompt')
+        : this.$t('adminTools.disableAccessJustificationPrompt');
+
+      if (showBillingWarning) {
+        message =
+          this.$t('adminTools.noActiveBillingPlanWarning') + '\n\n' + message;
+      }
+
+      this.$q
+        .dialog({
+          title: isEnabling
+            ? this.$t('adminTools.enableAccess')
+            : this.$t('adminTools.disableAccess'),
+          message,
+          prompt: {
+            model: '',
+            type: 'text',
+            label: this.$t('adminTools.accessJustificationLabel'),
+            isValid: (val: string) => val.trim().length > 0,
+          },
+          cancel: true,
+          persistent: true,
         })
-        .finally(() => {
-          this.$emit('memberUpdated');
-          setTimeout(() => {
-            this.stateLoading = false;
-          }, 1200);
+        .onOk((justification: string) => {
+          this.stateLoading = true;
+          this.$axios
+            .post(`/api/admin/members/${this.member.id}/state/${state}/`, {
+              justification: justification.trim(),
+            })
+            .catch(() => {
+              this.$q.dialog({
+                title: this.$t('error.error'),
+                message: this.$t('error.requestFailed'),
+              });
+            })
+            .finally(() => {
+              this.$emit('memberUpdated');
+              setTimeout(() => {
+                this.stateLoading = false;
+              }, 1200);
+            });
         });
     },
     activateMember() {
@@ -1902,6 +1968,25 @@ export default defineComponent({
 
 .cancelling {
   color: orange;
+}
+
+.log-desc {
+  display: inline-block;
+  max-width: 420px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+.log-desc--clickable {
+  cursor: pointer;
+}
+
+.log-desc--expanded {
+  white-space: normal;
+  overflow: visible;
+  word-break: break-word;
 }
 
 .q-field__after,

@@ -81,10 +81,11 @@ class MemberState(APIView):
 
     def post(self, request, member_id, state):
         member = User.objects.get(id=member_id)
+        justification = request.data.get("justification", "")
         if state == "active":
-            member.profile.activate(request)
+            member.profile.activate(request, justification=justification)
         elif state == "inactive":
-            member.profile.deactivate(request)
+            member.profile.deactivate(request, justification=justification)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -1067,9 +1068,11 @@ class MemberLogs(APIView):
         ]:
             user_event_logs.append(
                 {
+                    "id": user_event_log.id,
                     "date": user_event_log.date,
                     "description": user_event_log.description,
                     "logtype": user_event_log.get_logtype_display(),
+                    "data": user_event_log.data or "",
                 }
             )
 

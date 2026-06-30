@@ -433,14 +433,15 @@ class Profile(ExportModelOperationsMixin("profile"), models.Model):
         for interlock in self.interlocks.all():
             interlock.sync()
 
-    def deactivate(self, request=None):
+    def deactivate(self, request=None, justification=None):
         if request:
+            suffix = f" Justification: {justification}" if justification else ""
             request.user.log_event(
-                f"{request.user.profile.get_full_name()} deactivated member ({self.get_full_name()}).",
+                f"{request.user.profile.get_full_name()} deactivated member ({self.get_full_name()}).{suffix}",
                 "admin",
             )
             self.user.log_event(
-                f"{request.user.profile.get_full_name()} deactivated member.",
+                f"{request.user.profile.get_full_name()} deactivated member.{suffix}",
                 "admin",
             )
         else:
@@ -449,22 +450,29 @@ class Profile(ExportModelOperationsMixin("profile"), models.Model):
                 "profile",
             )
 
-        self.user.email_disable_member()
-        sms_message = sms.SMS()
-        sms_message.send_deactivated_access(self.phone)
+        try:
+            self.user.email_disable_member()
+        except Exception:
+            logger.exception("Failed to send deactivation email to %s", self.user.email)
+        try:
+            sms_message = sms.SMS()
+            sms_message.send_deactivated_access(self.phone)
+        except Exception:
+            logger.exception("Failed to send deactivation SMS to %s", self.user.email)
         self.state = "inactive"
         self.save()
         self.sync_access()
         return True
 
-    def activate(self, request=None):
+    def activate(self, request=None, justification=None):
         if request:
+            suffix = f" Justification: {justification}" if justification else ""
             request.user.log_event(
-                f"{request.user.profile.get_full_name()} activated member ({self.get_full_name()}).",
+                f"{request.user.profile.get_full_name()} activated member ({self.get_full_name()}).{suffix}",
                 "admin",
             )
             self.user.log_event(
-                f"{request.user.profile.get_full_name()} activated member.",
+                f"{request.user.profile.get_full_name()} activated member.{suffix}",
                 "admin",
             )
         else:
@@ -474,9 +482,17 @@ class Profile(ExportModelOperationsMixin("profile"), models.Model):
             )
 
         if self.state != "noob":
-            sms_message = sms.SMS()
-            sms_message.send_activated_access(self.phone)
-            self.user.email_enable_member()
+            try:
+                sms_message = sms.SMS()
+                sms_message.send_activated_access(self.phone)
+            except Exception:
+                logger.exception("Failed to send activation SMS to %s", self.user.email)
+            try:
+                self.user.email_enable_member()
+            except Exception:
+                logger.exception(
+                    "Failed to send activation email to %s", self.user.email
+                )
 
         self.state = "active"
         self.save()
