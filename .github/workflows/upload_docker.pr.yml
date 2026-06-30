@@ -6,6 +6,11 @@ on:
     types:
       - completed
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   upload-docker-pr:
     runs-on: ubuntu-latest
