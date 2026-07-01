@@ -431,6 +431,13 @@ export default {
     accountOnly: 'Endast konto',
     enableAccess: 'Tillåt Åtkomst',
     disableAccess: 'Stäng av åtkomst',
+    accessJustificationLabel: 'Motivering',
+    enableAccessJustificationPrompt:
+      'Ange en anledning till att du aktiverar åtkomsten.',
+    disableAccessJustificationPrompt:
+      'Ange en anledning till att du inaktiverar åtkomsten.',
+    noActiveBillingPlanWarning:
+      '⚠️ Varning: Den här medlemmen har inget aktivt betalningsabonnemang.',
     sendWelcomeEmail: 'Skicka välkomst-mail',
     sendSms: 'Skicka SMS till medlem',
     sendSmsModalTitle: 'Skicka {name} en sms varning.',
