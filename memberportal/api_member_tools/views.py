@@ -21,7 +21,7 @@ class SwipesList(APIView):
     get: This method returns the 300 most recent swipes for both doors and interlocks.
     """
 
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAdminUser,)
 
     def get(self, request):
         recent_doors = (
@@ -74,7 +74,7 @@ class Lastseen(APIView):
     get: This method returns when each user was last seen (ie when they last swiped).
     """
 
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAdminUser,)
     queryset = Profile.objects.filter(state="active").order_by("-last_seen")
 
     def get(self, request):
