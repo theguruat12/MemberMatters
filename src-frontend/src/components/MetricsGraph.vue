@@ -59,23 +59,35 @@ export default {
       };
     },
     series() {
-      let states = {};
-      this.metricsData.map((item) => {
+      // First pass: collect all known state keys across all snapshots
+      let allKeys = new Set();
+      this.metricsData.forEach((item) => {
         if (Array.isArray(item.data)) {
           item.data.forEach((state) => {
-            if (!state?.state && !state?.type) return;
-            if (states[state?.state ?? state?.type] === undefined) {
-              states[state?.state ?? state?.type] = [];
-            }
-            states[state?.state ?? state?.type].push(state.total);
+            const key = state?.state ?? state?.type;
+            if (key) allKeys.add(key);
           });
         } else {
-          if (states['value'] === undefined) {
-            states['value'] = [];
-          }
-          states['value'].push(item.data.value);
+          allKeys.add('value');
         }
       });
+
+      // Second pass: build aligned arrays — null for any state missing from a snapshot
+      let states = {};
+      allKeys.forEach((key) => (states[key] = []));
+      this.metricsData.forEach((item) => {
+        if (Array.isArray(item.data)) {
+          allKeys.forEach((key) => {
+            const entry = item.data.find((s) => (s?.state ?? s?.type) === key);
+            states[key].push(entry ? entry.total : null);
+          });
+        } else {
+          allKeys.forEach((key) => {
+            states[key].push(key === 'value' ? item.data.value : null);
+          });
+        }
+      });
+
       return Object.keys(states).map((state) => {
         return {
           name: this.$t('stats.labels.' + state),
