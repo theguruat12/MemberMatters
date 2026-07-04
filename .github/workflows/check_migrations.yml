@@ -7,6 +7,22 @@ on:
 jobs:
   check-migrations:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: membermatters
+          POSTGRES_USER: membermatters
+          POSTGRES_PASSWORD: membermatters
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v3
 
@@ -28,3 +44,22 @@ jobs:
         run: |
           python manage.py migrate
           python manage.py makemigrations --check
+
+      # Apply migrations from an empty schema against Postgres too. Dev/CI
+      # default to SQLite, but production runs Postgres, so this catches
+      # hand-written data/raw-SQL migrations that only work on SQLite (e.g.
+      # sqlite_master, "INSERT OR IGNORE").
+      - name: Apply migrations on Postgres
+        working-directory: memberportal
+        env:
+          MM_USE_POSTGRES: "1"
+          POSTGRES_DB: membermatters
+          POSTGRES_USER: membermatters
+          POSTGRES_PASSWORD: membermatters
+          # Reach the service container by its label hostname. This job runs
+          # inside a container (self-hosted runner), so the service is on the
+          # shared Docker network, not published to localhost.
+          POSTGRES_HOST: postgres
+          POSTGRES_PORT: "5432"
+          MM_LOG_LOCATION: /tmp/django.log
+        run: python manage.py migrate
