@@ -71,12 +71,14 @@ class GetConfig(APIView):
 
         keys = {"stripePublishableKey": config.STRIPE_PUBLISHABLE_KEY}
 
-        _pkg_path = os.path.join(
-            os.path.dirname(__file__), "..", "..", "src-frontend", "package.json"
-        )
-        with open(_pkg_path) as f:
-            package = json.load(f)
-            version = package.get("version")
+        _pkg_path = os.path.join(os.path.dirname(__file__), "..", "..", "package.json")
+        try:
+            with open(_pkg_path) as f:
+                package = json.load(f)
+                version = package.get("version")
+        except (OSError, ValueError):
+            logger.warning("Unable to read app version from %s", _pkg_path)
+            version = "unknown"
 
         try:
             homepage_cards = json.loads(config.HOME_PAGE_CARDS)
